@@ -1,34 +1,34 @@
-///////////////////////////////////////////////////////////////////////////////
-// \author (c) Marco Paland (info@paland.com)
-//             2014-2019, PALANDesign Hannover, Germany
+/////////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
+// \作者 (c) Marco Paland (info@paland.com)
+// 2014-2019，PALANDesign 汉诺威，德国
 //
-// \license The MIT License (MIT)
+// \license 麻省理工学院许可证 (MIT)
 //
-// Permission is hereby granted, free of charge, to any person obtaining a copy
-// of this software and associated documentation files (the "Software"), to deal
-// in the Software without restriction, including without limitation the rights
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-// copies of the Software, and to permit persons to whom the Software is
-// furnished to do so, subject to the following conditions:
+// 特此免费授予任何获得副本的人许可
+// 本软件及相关文档文件（“软件”）的处理
+// 在软件中不受限制，包括但不限于权利
+// 使用、复制、修改、合并、发布、分发、再许可和/或出售
+// 软件的副本，并允许软件的使用者
+// 可以这样做，但须满足以下条件：
 //
-// The above copyright notice and this permission notice shall be included in
-// all copies or substantial portions of the Software.
+// 上述版权声明和本许可声明应包含在
+// 软件的所有副本或重要部分。
 //
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-// THE SOFTWARE.
+// 该软件按“原样”提供，不提供任何形式的明示或保证
+// 默示的，包括但不限于适销性保证，
+// 适用于特定目的且不侵权。 在任何情况下都不得
+// 作者或版权所有者对任何索赔、损害或其他责任负责
+// 责任，无论是合同行为、侵权行为还是其他行为，均由以下原因引起：
+// 与本软件无关或与之相关，或者与本软件的使用或其他交易有关
+// 软件。
 //
-// \brief Tiny printf, sprintf and (v)snprintf implementation, optimized for speed on
-//        embedded systems with a very limited resources. These routines are thread
-//        safe and reentrant!
-//        Use this instead of the bloated standard/newlib printf cause these use
-//        malloc for printf (and may not be thread safe).
+// \brief 小型 printf、sprintf 和 (v)snprintf 实现，针对速度进行了优化
+// 资源非常有限的嵌入式系统。 这些例程是线程
+// 安全且可重入！
+// 使用这个而不是臃肿的标准/newlib printf 因为这些使用
+// printf 的 malloc （并且可能不是线程安全的）。
 //
-///////////////////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////// /////////////////////////////////////////////////////////
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -36,68 +36,68 @@
 #include "printf.h"
 
 
-// define this globally (e.g. gcc -DPRINTF_INCLUDE_CONFIG_H ...) to include the
-// printf_config.h header file
-// default: undefined
+// 全局定义它（例如 gcc -DPRINTF_INCLUDE_CONFIG_H ...）以包含
+// printf_config.h 头文件
+// 默认值：未定义
 #ifdef PRINTF_INCLUDE_CONFIG_H
 #include "printf_config.h"
 #endif
 
 
-// 'ntoa' conversion buffer size, this must be big enough to hold one converted
-// numeric number including padded zeros (dynamically created on stack)
-// default: 32 byte
+// 'ntoa' 转换缓冲区大小，必须足够大才能容纳一个转换后的内容
+// 包含填充零的数字（在堆栈上动态创建）
+// 默认：32 字节
 #ifndef PRINTF_NTOA_BUFFER_SIZE
 #define PRINTF_NTOA_BUFFER_SIZE    32U
 #endif
 
-// 'ftoa' conversion buffer size, this must be big enough to hold one converted
-// float number including padded zeros (dynamically created on stack)
-// default: 32 byte
+// 'ftoa' 转换缓冲区大小，必须足够大才能容纳一个转换后的内容
+// 包含填充零的浮点数（在堆栈上动态创建）
+// 默认：32 字节
 #ifndef PRINTF_FTOA_BUFFER_SIZE
 #define PRINTF_FTOA_BUFFER_SIZE    32U
 #endif
 
-// support for the floating point type (%f)
-// default: activated
+// 支持浮点类型（%f）
+// 默认：激活
 #ifndef PRINTF_DISABLE_SUPPORT_FLOAT
 #define PRINTF_SUPPORT_FLOAT
 #endif
 
-// support for exponential floating point notation (%e/%g)
-// default: activated
+// 支持指数浮点表示法 (%e/%g)
+// 默认：激活
 #ifndef PRINTF_DISABLE_SUPPORT_EXPONENTIAL
 #define PRINTF_SUPPORT_EXPONENTIAL
 #endif
 
-// define the default floating point precision
-// default: 6 digits
+// 定义默认浮点精度
+// 默认：6位
 #ifndef PRINTF_DEFAULT_FLOAT_PRECISION
 #define PRINTF_DEFAULT_FLOAT_PRECISION  6U
 #endif
 
-// define the largest float suitable to print with %f
-// default: 1e9
+// 定义适合用 %f 打印的最大浮点数
+// 默认值：1e9
 #ifndef PRINTF_MAX_FLOAT
 #define PRINTF_MAX_FLOAT  1e9
 #endif
 
-// support for the long long types (%llu or %p)
-// default: activated
+// 支持 long long 类型（%llu 或 %p）
+// 默认：激活
 #ifndef PRINTF_DISABLE_SUPPORT_LONG_LONG
 #define PRINTF_SUPPORT_LONG_LONG
 #endif
 
-// support for the ptrdiff_t type (%t)
-// ptrdiff_t is normally defined in <stddef.h> as long or long long type
-// default: activated
+// 支持 ptrdiff_t 类型 (%t)
+// ptrdiff_t 通常在 <stddef.h> 中定义为 long 或 long long 类型
+// 默认：激活
 #ifndef PRINTF_DISABLE_SUPPORT_PTRDIFF_T
 #define PRINTF_SUPPORT_PTRDIFF_T
 #endif
 
 ///////////////////////////////////////////////////////////////////////////////
 
-// internal flag definitions
+// 内部标志定义
 #define FLAGS_ZEROPAD   (1U <<  0U)
 #define FLAGS_LEFT      (1U <<  1U)
 #define FLAGS_PLUS      (1U <<  2U)
@@ -112,17 +112,17 @@
 #define FLAGS_ADAPT_EXP (1U << 11U)
 
 
-// import float.h for DBL_MAX
+// 为 DBL_MAX 导入 float.h
 #if defined(PRINTF_SUPPORT_FLOAT)
 #include <float.h>
 #endif
 
 
-// output function type
+// 输出函数类型
 typedef void (*out_fct_type)(char character, void* buffer, size_t idx, size_t maxlen);
 
 
-// wrapper (used as buffer) for output function type
+// 输出函数类型的包装器（用作缓冲区）
 typedef struct {
   void  (*fct)(char character, void* arg);
   void* arg;
