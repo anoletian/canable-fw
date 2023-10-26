@@ -1,51 +1,20 @@
 /**
-  ******************************************************************************
-  * @file           : usbd_conf.c
-  * @version        : v2.0_Cube
-  * @brief          : This file implements the board support package for the USB device library
-  ******************************************************************************
-  * This notice applies to any and all portions of this file
-  * that are not between comment pairs USER CODE BEGIN and
-  * USER CODE END. Other portions of this file, whether 
-  * inserted by the user or by software development tools
-  * are owned by their respective copyright owners.
-  *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
-  * All rights reserved.
-  *
-  * Redistribution and use in source and binary forms, with or without 
-  * modification, are permitted, provided that the following conditions are met:
-  *
-  * 1. Redistribution of source code must retain the above copyright notice, 
-  *    this list of conditions and the following disclaimer.
-  * 2. Redistributions in binary form must reproduce the above copyright notice,
-  *    this list of conditions and the following disclaimer in the documentation
-  *    and/or other materials provided with the distribution.
-  * 3. Neither the name of STMicroelectronics nor the names of other 
-  *    contributors to this software may be used to endorse or promote products 
-  *    derived from this software without specific written permission.
-  * 4. This software, including modifications and/or derivative works of this 
-  *    software, must execute solely and exclusively on microcontroller or
-  *    microprocessor devices manufactured by or for STMicroelectronics.
-  * 5. Redistribution and use of this software other than as permitted under 
-  *    this license is void and will automatically terminate your rights under 
-  *    this license. 
-  *
-  * THIS SOFTWARE IS PROVIDED BY STMICROELECTRONICS AND CONTRIBUTORS "AS IS" 
-  * AND ANY EXPRESS, IMPLIED OR STATUTORY WARRANTIES, INCLUDING, BUT NOT 
-  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
-  * PARTICULAR PURPOSE AND NON-INFRINGEMENT OF THIRD PARTY INTELLECTUAL PROPERTY
-  * RIGHTS ARE DISCLAIMED TO THE FULLEST EXTENT PERMITTED BY LAW. IN NO EVENT 
-  * SHALL STMICROELECTRONICS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
-  * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, 
-  * OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF 
-  * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING 
-  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE,
-  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
-  *
-  ******************************************************************************
-  */
+   ****************************************************** **************************
+   * @文件：usbd_conf.c
+   * @版本：v2.0_Cube
+   * @brief ：该文件实现了USB设备库的板级支持包
+   ****************************************************** **************************
+   * 本通知适用于本文件的任何和所有部分
+   * 不在注释对 USER CODE BEGIN 和之间
+   * 用户代码结束。 该文件的其他部分，无论
+   * 由用户或软件开发工具插入
+   * 归其各自版权所有者所有。
+   *
+   * 版权所有 (c) 2018 STMicroelectronics International N.V.
+   * 版权所有。
+
+   ****************************************************** **************************
+   */
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32f0xx.h"
@@ -285,36 +254,41 @@ void HAL_PCD_DisconnectCallback(PCD_HandleTypeDef *hpcd)
 *******************************************************************************/
 
 /**
-  * @brief  Initializes the low level portion of the device driver.
-  * @param  pdev: Device handle
-  * @retval USBD status
+  * @brief  初始化设备驱动程序的底层部分。
+  * @param  pdev: 设备句柄
+  * @retval USBD状态
   */
 USBD_StatusTypeDef USBD_LL_Init(USBD_HandleTypeDef *pdev)
 {
-  /* Init USB Ip. */
-  /* Link the driver to the stack. */
-  hpcd_USB_FS.pData = pdev;
-  pdev->pData = &hpcd_USB_FS;
+  /* 初始化USB IP核。 */
+  /* 将驱动程序与栈链接。 */
+  hpcd_USB_FS.pData = pdev;  // 将设备句柄与USB驱动程序的数据指针关联
+  pdev->pData = &hpcd_USB_FS;  // 设备句柄的数据指针指向USB驱动程序结构
 
-  hpcd_USB_FS.Instance = USB;
-  hpcd_USB_FS.Init.dev_endpoints = 8;
-  hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;
-  hpcd_USB_FS.Init.ep0_mps = DEP0CTL_MPS_64;
-  hpcd_USB_FS.Init.phy_itface = PCD_PHY_EMBEDDED;
-  hpcd_USB_FS.Init.low_power_enable = DISABLE;
-  hpcd_USB_FS.Init.lpm_enable = DISABLE;
-  hpcd_USB_FS.Init.battery_charging_enable = DISABLE;
-  if (HAL_PCD_Init(&hpcd_USB_FS) != HAL_OK)
+  // 下面的几行设定了USB硬件相关的参数
+  hpcd_USB_FS.Instance = USB;  // 指定USB驱动实例
+  hpcd_USB_FS.Init.dev_endpoints = 8;  // 设定设备的端点数量
+  hpcd_USB_FS.Init.speed = PCD_SPEED_FULL;  // 设置USB通信速度为全速
+  hpcd_USB_FS.Init.ep0_mps = DEP0CTL_MPS_64;  // 设置端点零的最大包大小为64
+  hpcd_USB_FS.Init.phy_itface = PCD_PHY_EMBEDDED;  // 设置物理接口为嵌入式
+  hpcd_USB_FS.Init.low_power_enable = DISABLE;  // 禁用低功耗模式
+  hpcd_USB_FS.Init.lpm_enable = DISABLE;  // 禁用Link Power Management（链路电源管理）
+  hpcd_USB_FS.Init.battery_charging_enable = DISABLE;  // 禁用电池充电功能
+
+  // 调用HAL库函数初始化USB设备
+  if (HAL_PCD_Init(&hpcd_USB_FS) != HAL_OK)  // 如果初始化不成功
   {
-//    _Error_Handler(__FILE__, __LINE__);
+//    _Error_Handler(__FILE__, __LINE__);  // 调用错误处理函数（这里被注释掉了）
   }
 
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x18);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x80 , PCD_SNG_BUF, 0x58);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x81 , PCD_SNG_BUF, 0xC0);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x01 , PCD_SNG_BUF, 0x110);
-  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x82 , PCD_SNG_BUF, 0x100);
-  return USBD_OK;
+  // 配置USB设备的物理内存区域
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x00 , PCD_SNG_BUF, 0x18);  // 端点0配置
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x80 , PCD_SNG_BUF, 0x58);  // 端点1配置
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x81 , PCD_SNG_BUF, 0xC0);  // 端点2配置
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x01 , PCD_SNG_BUF, 0x110);  // 端点3配置
+  HAL_PCDEx_PMAConfig((PCD_HandleTypeDef*)pdev->pData , 0x82 , PCD_SNG_BUF, 0x100);  // 端点4配置
+
+  return USBD_OK;  // 函数执行成功，返回OK状态
 }
 
 /**
@@ -350,33 +324,36 @@ USBD_StatusTypeDef USBD_LL_DeInit(USBD_HandleTypeDef *pdev)
 }
 
 /**
-  * @brief  Starts the low level portion of the device driver.
-  * @param  pdev: Device handle
-  * @retval USBD status
+  * @brief  启动设备驱动程序的底层部分。
+  * @param  pdev: 设备句柄
+  * @retval USBD状态
   */
 USBD_StatusTypeDef USBD_LL_Start(USBD_HandleTypeDef *pdev)
 {
   HAL_StatusTypeDef hal_status = HAL_OK;
   USBD_StatusTypeDef usb_status = USBD_OK;
  
+  // 启动PCD（外设控制器驱动程序）
   hal_status = HAL_PCD_Start(pdev->pData);
      
-  switch (hal_status) {
+  // 根据HAL状态设置USB状态
+  switch (hal_status) 
+  {
     case HAL_OK :
       usb_status = USBD_OK;
-    break;
+      break;
     case HAL_ERROR :
       usb_status = USBD_FAIL;
-    break;
+      break;
     case HAL_BUSY :
       usb_status = USBD_BUSY;
-    break;
+      break;
     case HAL_TIMEOUT :
       usb_status = USBD_FAIL;
-    break;
+      break;
     default :
       usb_status = USBD_FAIL;
-    break;
+      break;
   }
   return usb_status;
 }

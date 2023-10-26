@@ -80,43 +80,44 @@
 
 /**
 * @brief  USBD_Init
-*         Initializes the device stack and load the class driver
-* @param  pdev: device instance
-* @param  pdesc: Descriptor structure address
-* @param  id: Low level core index
-* @retval None
+*         初始化设备栈并加载类驱动程序
+* @param  pdev: 设备实例
+* @param  pdesc: 描述符结构体地址
+* @param  id: 低级核心索引
+* @retval None（无返回值）
 */
 USBD_StatusTypeDef USBD_Init(USBD_HandleTypeDef *pdev,
                              USBD_DescriptorsTypeDef *pdesc, uint8_t id)
 {
-  /* Check whether the USB Host handle is valid */
+  /* 检查USB主机句柄是否有效 */
   if (pdev == NULL)
   {
 #if (USBD_DEBUG_LEVEL > 1U)
-    USBD_ErrLog("Invalid Device handle");
+    USBD_ErrLog("无效的设备句柄");  // 如果提供的设备句柄无效，则在调试日志中记录错误信息
 #endif
-    return USBD_FAIL;
+    return USBD_FAIL;  // 如果句柄无效，函数返回失败状态
   }
 
-  /* Unlink previous class*/
+  /* 断开之前的类连接 */
   if (pdev->pClass != NULL)
   {
-    pdev->pClass = NULL;
+    pdev->pClass = NULL;  // 如果之前已加载过类，则将其设为NULL，准备加载新的驱动类
   }
 
-  /* Assign USBD Descriptors */
+  /* 分配USBD描述符 */
   if (pdesc != NULL)
   {
-    pdev->pDesc = pdesc;
+    pdev->pDesc = pdesc;  // 如果提供了描述符结构体的地址，则将其分配给设备句柄的相应成员
   }
 
-  /* Set Device initial State */
-  pdev->dev_state = USBD_STATE_DEFAULT;
-  pdev->id = id;
-  /* Initialize low level driver */
-  USBD_LL_Init(pdev);
+  /* 设置设备的初始状态 */
+  pdev->dev_state = USBD_STATE_DEFAULT;  // 设备的初始状态被设为默认状态
+  pdev->id = id;  // 设置设备的低级核心索引
 
-  return USBD_OK;
+  /* 初始化低级驱动 */
+  USBD_LL_Init(pdev);  // 调用底层驱动的初始化函数来准备USB硬件
+
+  return USBD_OK;  // 函数执行成功，返回OK状态
 }
 
 /**
@@ -144,24 +145,24 @@ USBD_StatusTypeDef USBD_DeInit(USBD_HandleTypeDef *pdev)
 
 /**
   * @brief  USBD_RegisterClass
-  *         Link class driver to Device Core.
-  * @param  pDevice : Device Handle
-  * @param  pclass: Class handle
-  * @retval USBD Status
+  *         将类驱动链接到设备核心。
+  * @param  pDevice : 设备句柄
+  * @param  pclass: 类句柄
+  * @retval USBD状态
   */
 USBD_StatusTypeDef  USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeDef *pclass)
 {
   USBD_StatusTypeDef status = USBD_OK;
   if (pclass != NULL)
   {
-    /* link the class to the USB Device handle */
+    /* 将类链接到USB设备句柄 */
     pdev->pClass = pclass;
     status = USBD_OK;
   }
   else
   {
 #if (USBD_DEBUG_LEVEL > 1U)
-    USBD_ErrLog("Invalid Class handle");
+    USBD_ErrLog("无效的类句柄");
 #endif
     status = USBD_FAIL;
   }
@@ -171,13 +172,13 @@ USBD_StatusTypeDef  USBD_RegisterClass(USBD_HandleTypeDef *pdev, USBD_ClassTypeD
 
 /**
   * @brief  USBD_Start
-  *         Start the USB Device Core.
-  * @param  pdev: Device Handle
-  * @retval USBD Status
+  *         启动USB设备核心。
+  * @param  pdev: 设备句柄
+  * @retval USBD状态
   */
 USBD_StatusTypeDef  USBD_Start(USBD_HandleTypeDef *pdev)
 {
-  /* Start the low level driver  */
+  /* 启动底层驱动 */
   USBD_LL_Start(pdev);
 
   return USBD_OK;

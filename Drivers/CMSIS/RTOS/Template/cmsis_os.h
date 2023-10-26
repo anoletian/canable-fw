@@ -1,54 +1,54 @@
-/* ----------------------------------------------------------------------
- * $Date:        5. February 2013
- * $Revision:    V1.02
- *
- * Project:      CMSIS-RTOS API
- * Title:        cmsis_os.h template header file
- *
- * Version 0.02
- *    Initial Proposal Phase
- * Version 0.03
- *    osKernelStart added, optional feature: main started as thread
- *    osSemaphores have standard behavior
- *    osTimerCreate does not start the timer, added osTimerStart
- *    osThreadPass is renamed to osThreadYield
- * Version 1.01
- *    Support for C++ interface
- *     - const attribute removed from the osXxxxDef_t typedef's
- *     - const attribute added to the osXxxxDef macros
- *    Added: osTimerDelete, osMutexDelete, osSemaphoreDelete
- *    Added: osKernelInitialize
- * Version 1.02
- *    Control functions for short timeouts in microsecond resolution:
- *    Added: osKernelSysTick, osKernelSysTickFrequency, osKernelSysTickMicroSec
- *    Removed: osSignalGet 
- *----------------------------------------------------------------------------
- *
- * Copyright (c) 2013 ARM LIMITED
- * All rights reserved.
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions are met:
- *  - Redistributions of source code must retain the above copyright
- *    notice, this list of conditions and the following disclaimer.
- *  - Redistributions in binary form must reproduce the above copyright
- *    notice, this list of conditions and the following disclaimer in the
- *    documentation and/or other materials provided with the distribution.
- *  - Neither the name of ARM  nor the names of its contributors may be used
- *    to endorse or promote products derived from this software without
- *    specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
- * AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
- * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
- * ARE DISCLAIMED. IN NO EVENT SHALL COPYRIGHT HOLDERS AND CONTRIBUTORS BE
- * LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
- * CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
- * SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
- * INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
- * CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
- * ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
- * POSSIBILITY OF SUCH DAMAGE.
- *---------------------------------------------------------------------------*/
+/* ------------------------------------------------ ----------------------
+  * $日期：2013 年 2 月 5 日
+  * $修订版：V1.02
+  *
+  * 项目：CMSIS-RTOS API
+  * 标题：cmsis_os.h模板头文件
+  *
+  * 版本0.02
+  * 初始提案阶段
+  * 版本0.03
+  * 添加了 osKernelStart，可选功能：main 作为线程启动
+  * osSemaphores 具有标准行为
+  * osTimerCreate不启动定时器，添加了osTimerStart
+  * osThreadPass 更名为 osThreadYield
+  * 1.01版
+  * 支持C++接口
+  * - 从 osXxxxDef_t typedef 中删除了 const 属性
+  * - const 属性添加到 osXxxxDef 宏
+  * 添加：osTimerDelete、osMutexDelete、osSemaphoreDelete
+  * 添加：osKernelInitialize
+  * 1.02版
+  * 微秒分辨率的短超时控制函数：
+  * 添加：osKernelSysTick、osKernelSysTickFrequency、osKernelSysTickMicroSec
+  * 删除：osSignalGet
+  *------------------------------------------------- ----------------------------
+  *
+  * 版权所有 (c) 2013 ARM 有限公司
+  * 版权所有。
+  * 以源代码和二进制形式重新分发和使用，有或没有
+  * 允许修改，但须满足以下条件：
+  * - 源代码的再分发必须保留上述版权
+  *通知、此条件列表和以下免责声明。
+  * - 以二进制形式重新分发必须复制上述版权
+  * 通知、此条件列表以及以下免责声明
+  * 随发行版一起提供的文档和/或其他材料。
+  * - 不得使用 ARM 的名称及其贡献者的名称
+  * 认可或推广源自本软件的产品，而无需
+  * 具体的事先书面许可。
+  *
+  * 本软件由版权所有者和贡献者“按原样”提供
+  * 以及任何明示或暗示的保证，包括但不限于
+  * 适销性和特定用途适用性的默示保证
+  * 不予承认。 在任何情况下，版权所有者和贡献者均不得
+  * 对任何直接、间接、附带、特殊、示范或
+  * 间接损害（包括但不限于采购
+  * 替代商品或服务； 使用、数据或利润的损失； 或商业
+  * 中断）无论是何种原因造成的以及基于任何责任理论，无论是在
+  * 合同、严格责任或侵权行为（包括疏忽或其他）
+  * 以任何方式因使用本软件而引起的，即使已被告知
+  * 此类损坏的可能性。
+  *------------------------------------------------- --------------------------*/
  
  
 #ifndef _CMSIS_OS_H

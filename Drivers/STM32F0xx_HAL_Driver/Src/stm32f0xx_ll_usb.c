@@ -77,21 +77,21 @@ HAL_StatusTypeDef USB_CoreInit(USB_TypeDef *USBx, USB_CfgTypeDef cfg)
 
 /**
   * @brief  USB_EnableGlobalInt
-  *         Enables the controller's Global Int in the AHB Config reg
-  * @param  USBx : Selected device
-  * @retval HAL status
+  *         在AHB配置寄存器中启用控制器的全局中断
+  * @param  USBx : 选择的设备
+  * @retval HAL状态
   */
 HAL_StatusTypeDef USB_EnableGlobalInt(USB_TypeDef *USBx)
 {
   uint16_t winterruptmask;
 
-  /* Set winterruptmask variable */
+  /* 设置winterruptmask变量 */
   winterruptmask = USB_CNTR_CTRM  | USB_CNTR_WKUPM |
-                   USB_CNTR_SUSPM | USB_CNTR_ERRM |
-                   USB_CNTR_SOFM | USB_CNTR_ESOFM |
+                   USB_CNTR_SUSPM | USB_CNTR_ERRM  |
+                   USB_CNTR_SOFM  | USB_CNTR_ESOFM |
                    USB_CNTR_RESETM | USB_CNTR_L1REQM;
 
-  /* Set interrupt mask */
+  /* 设置中断掩码 */
   USBx->CNTR |= winterruptmask;
 
   return HAL_OK;
@@ -141,32 +141,31 @@ HAL_StatusTypeDef USB_SetCurrentMode(USB_TypeDef *USBx, USB_ModeTypeDef mode)
 }
 
 /**
-  * @brief  USB_DevInit : Initializes the USB controller registers
-  *         for device mode
-  * @param  USBx : Selected device
-  * @param  cfg  : pointer to a USB_CfgTypeDef structure that contains
-  *         the configuration information for the specified USBx peripheral.
-  * @retval HAL status
+  * @brief  USB_DevInit：初始化设备模式下的USB控制器寄存器
+  * @param  USBx：所选设备
+  * @param  cfg：指向USB_CfgTypeDef结构的指针，该结构包含
+  *         指定USBx外设的配置信息。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef USB_DevInit(USB_TypeDef *USBx, USB_CfgTypeDef cfg)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译器警告未使用的参数 */
   UNUSED(cfg);
 
-  /* Init Device */
+  /* 初始化设备 */
   /*CNTR_FRES = 1*/
   USBx->CNTR = USB_CNTR_FRES;
 
   /*CNTR_FRES = 0*/
   USBx->CNTR = 0;
 
-  /*Clear pending interrupts*/
+  /* 清除待处理中断 */
   USBx->ISTR = 0;
 
-  /*Set Btable Address*/
+  /* 设置Btable地址 */
   USBx->BTABLE = BTABLE_ADDRESS;
 
-  /* Enable USB Device Interrupt mask */
+  /* 启用USB设备中断掩码 */
   (void)USB_EnableGlobalInt(USBx);
 
   return HAL_OK;
@@ -621,16 +620,16 @@ HAL_StatusTypeDef  USB_SetDevAddress(USB_TypeDef *USBx, uint8_t address)
 }
 
 /**
-  * @brief  USB_DevConnect : Connect the USB device by enabling the pull-up/pull-down
-  * @param  USBx : Selected device
-  * @retval HAL status
+  * @brief  USB_DevConnect：通过启用上拉/下拉电阻来连接USB设备
+  * @param  USBx：所选设备
+  * @retval HAL状态
   */
-HAL_StatusTypeDef  USB_DevConnect(USB_TypeDef *USBx)
+HAL_StatusTypeDef USB_DevConnect(USB_TypeDef *USBx)
 {
-  /* Enabling DP Pull-UP bit to Connect internal PU resistor on USB DP line */
+  /* 启用DP上拉位，将内部上拉电阻连接到USB DP线 */
   USBx->BCDR |= USB_BCDR_DPPU;
 
-  return HAL_OK;
+  return HAL_OK;  // 操作成功，返回HAL_OK状态
 }
 
 /**

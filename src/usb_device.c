@@ -9,10 +9,10 @@
 #include "usbd_cdc_if.h"
 
 
-// USB Device Core handle declaration.
+// USB 设备核心句柄声明。
 USBD_HandleTypeDef hUsbDeviceFS;
 
-// Init USB device, add CDC class and start the library
+// 初始化USB设备，添加CDC类并启动库
 void usb_init(void)
 {
   USBD_Init(&hUsbDeviceFS, &FS_Desc, DEVICE_FS);

@@ -284,14 +284,13 @@ __weak void HAL_IncTick(void)
 }
 
 /**
-  * @brief  Provides a tick value in millisecond.
-  * @note   This function is declared as __weak  to be overwritten  in case of other 
-  *       implementations in user file.
-  * @retval tick value
+  * @brief  提供以毫秒为单位的计时器数值。
+  * @note   该函数被声明为 __weak，以便在用户文件中有其他实现时可以被重写。
+  * @retval 返回计时器的当前数值
   */
 __weak uint32_t HAL_GetTick(void)
 {
-  return uwTick;
+  return uwTick;  // uwTick 是一个全局变量，通常用来保存自系统启动以来经过的毫秒数
 }
 
 /**

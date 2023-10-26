@@ -170,68 +170,69 @@ typedef struct
 } CAN_TxHeaderTypeDef;
 
 /**
-  * @brief  CAN Rx message header structure definition
+  * @brief  CAN接收消息头结构体定义
   */
 typedef struct
 {
-  uint32_t StdId;    /*!< Specifies the standard identifier.
-                          This parameter must be a number between Min_Data = 0 and Max_Data = 0x7FF. */
+  uint32_t StdId;  /*!< 指定标准标识符。
+                        该参数必须是Min_Data = 0和Max_Data = 0x7FF之间的数字。 */
 
-  uint32_t ExtId;    /*!< Specifies the extended identifier.
-                          This parameter must be a number between Min_Data = 0 and Max_Data = 0x1FFFFFFF. */
+  uint32_t ExtId;  /*!< 指定扩展标识符。
+                        该参数必须是Min_Data = 0和Max_Data = 0x1FFFFFFF之间的数字。 */
 
-  uint32_t IDE;      /*!< Specifies the type of identifier for the message that will be transmitted.
-                          This parameter can be a value of @ref CAN_identifier_type */
+  uint32_t IDE;    /*!< 指定将被传输的消息的标识符类型。
+                        该参数可以是 @ref CAN_identifier_type 的值 */
 
-  uint32_t RTR;      /*!< Specifies the type of frame for the message that will be transmitted.
-                          This parameter can be a value of @ref CAN_remote_transmission_request */
+  uint32_t RTR;    /*!< 指定将被传输的消息的帧类型。
+                        该参数可以是 @ref CAN_remote_transmission_request 的值 */
 
-  uint32_t DLC;      /*!< Specifies the length of the frame that will be transmitted.
-                          This parameter must be a number between Min_Data = 0 and Max_Data = 8. */
+  uint32_t DLC;    /*!< 指定将被传输的帧的长度。
+                        该参数必须是Min_Data = 0和Max_Data = 8之间的数字。 */
 
-  uint32_t Timestamp; /*!< Specifies the timestamp counter value captured on start of frame reception.
-                          @note: Time Triggered Communication Mode must be enabled.
-                          This parameter must be a number between Min_Data = 0 and Max_Data = 0xFFFF. */
+  uint32_t Timestamp; /*!< 指定在接收帧开始时捕获的时间戳计数器值。
+                           注意：必须启用时间触发通信模式。
+                           该参数必须是Min_Data = 0和Max_Data = 0xFFFF之间的数字。 */
 
-  uint32_t FilterMatchIndex; /*!< Specifies the index of matching acceptance filter element.
-                          This parameter must be a number between Min_Data = 0 and Max_Data = 0xFF. */
+  uint32_t FilterMatchIndex; /*!< 指定匹配接受过滤器元素的索引。
+                                  该参数必须是Min_Data = 0和Max_Data = 0xFF之间的数字。 */
 
 } CAN_RxHeaderTypeDef;
 
 /**
-  * @brief  CAN handle Structure definition
+  * @brief  CAN句柄结构定义
   */
 typedef struct __CAN_HandleTypeDef
 {
-  CAN_TypeDef                 *Instance;                 /*!< Register base address */
+  CAN_TypeDef                 *Instance;                 /*!< 寄存器基地址 */
 
-  CAN_InitTypeDef             Init;                      /*!< CAN required parameters */
+  CAN_InitTypeDef             Init;                      /*!< CAN所需参数 */
 
-  __IO HAL_CAN_StateTypeDef   State;                     /*!< CAN communication state */
+  __IO HAL_CAN_StateTypeDef   State;                     /*!< CAN通信状态 */
 
-  __IO uint32_t               ErrorCode;                 /*!< CAN Error code.
-                                                              This parameter can be a value of @ref CAN_Error_Code */
+  __IO uint32_t               ErrorCode;                 /*!< CAN错误代码。
+                                                              该参数可以是 @ref CAN_Error_Code 的值 */
 
 #if USE_HAL_CAN_REGISTER_CALLBACKS == 1
-  void (* TxMailbox0CompleteCallback)(struct __CAN_HandleTypeDef *hcan);/*!< CAN Tx Mailbox 0 complete callback    */
-  void (* TxMailbox1CompleteCallback)(struct __CAN_HandleTypeDef *hcan);/*!< CAN Tx Mailbox 1 complete callback    */
-  void (* TxMailbox2CompleteCallback)(struct __CAN_HandleTypeDef *hcan);/*!< CAN Tx Mailbox 2 complete callback    */
-  void (* TxMailbox0AbortCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Tx Mailbox 0 abort callback       */
-  void (* TxMailbox1AbortCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Tx Mailbox 1 abort callback       */
-  void (* TxMailbox2AbortCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Tx Mailbox 2 abort callback       */
-  void (* RxFifo0MsgPendingCallback)(struct __CAN_HandleTypeDef *hcan); /*!< CAN Rx FIFO 0 msg pending callback    */
-  void (* RxFifo0FullCallback)(struct __CAN_HandleTypeDef *hcan);       /*!< CAN Rx FIFO 0 full callback           */
-  void (* RxFifo1MsgPendingCallback)(struct __CAN_HandleTypeDef *hcan); /*!< CAN Rx FIFO 1 msg pending callback    */
-  void (* RxFifo1FullCallback)(struct __CAN_HandleTypeDef *hcan);       /*!< CAN Rx FIFO 1 full callback           */
-  void (* SleepCallback)(struct __CAN_HandleTypeDef *hcan);             /*!< CAN Sleep callback                    */
-  void (* WakeUpFromRxMsgCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Wake Up from Rx msg callback      */
-  void (* ErrorCallback)(struct __CAN_HandleTypeDef *hcan);             /*!< CAN Error callback                    */
+  void (* TxMailbox0CompleteCallback)(struct __CAN_HandleTypeDef *hcan);/*!< CAN Tx邮箱0完成回调    */
+  void (* TxMailbox1CompleteCallback)(struct __CAN_HandleTypeDef *hcan);/*!< CAN Tx邮箱1完成回调    */
+  void (* TxMailbox2CompleteCallback)(struct __CAN_HandleTypeDef *hcan);/*!< CAN Tx邮箱2完成回调    */
+  void (* TxMailbox0AbortCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Tx邮箱0中止回调    */
+  void (* TxMailbox1AbortCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Tx邮箱1中止回调    */
+  void (* TxMailbox2AbortCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN Tx邮箱2中止回调    */
+  void (* RxFifo0MsgPendingCallback)(struct __CAN_HandleTypeDef *hcan); /*!< CAN Rx FIFO 0消息待处理回调 */
+  void (* RxFifo0FullCallback)(struct __CAN_HandleTypeDef *hcan);       /*!< CAN Rx FIFO 0满回调    */
+  void (* RxFifo1MsgPendingCallback)(struct __CAN_HandleTypeDef *hcan); /*!< CAN Rx FIFO 1消息待处理回调 */
+  void (* RxFifo1FullCallback)(struct __CAN_HandleTypeDef *hcan);       /*!< CAN Rx FIFO 1满回调    */
+  void (* SleepCallback)(struct __CAN_HandleTypeDef *hcan);             /*!< CAN休眠回调            */
+  void (* WakeUpFromRxMsgCallback)(struct __CAN_HandleTypeDef *hcan);   /*!< CAN从接收消息中唤醒回调 */
+  void (* ErrorCallback)(struct __CAN_HandleTypeDef *hcan);             /*!< CAN错误回调            */
 
-  void (* MspInitCallback)(struct __CAN_HandleTypeDef *hcan);           /*!< CAN Msp Init callback                 */
-  void (* MspDeInitCallback)(struct __CAN_HandleTypeDef *hcan);         /*!< CAN Msp DeInit callback               */
+  void (* MspInitCallback)(struct __CAN_HandleTypeDef *hcan);           /*!< CAN Msp初始化回调      */
+  void (* MspDeInitCallback)(struct __CAN_HandleTypeDef *hcan);         /*!< CAN Msp反初始化回调    */
 
 #endif /* (USE_HAL_CAN_REGISTER_CALLBACKS) */
 } CAN_HandleTypeDef;
+
 
 #if USE_HAL_CAN_REGISTER_CALLBACKS == 1
 /**

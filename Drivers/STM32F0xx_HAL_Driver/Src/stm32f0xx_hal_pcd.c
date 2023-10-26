@@ -112,10 +112,9 @@ static HAL_StatusTypeDef PCD_EP_ISR_Handler(PCD_HandleTypeDef *hpcd);
   */
 
 /**
-  * @brief  Initializes the PCD according to the specified
-  *         parameters in the PCD_InitTypeDef and initialize the associated handle.
-  * @param  hpcd PCD handle
-  * @retval HAL status
+  * @brief  根据PCD_InitTypeDef中指定的参数初始化PCD（外设通信设备），并初始化相关的句柄。
+  * @param  hpcd: PCD句柄
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_PCD_Init(PCD_HandleTypeDef *hpcd)
 {
@@ -245,17 +244,17 @@ HAL_StatusTypeDef HAL_PCD_DeInit(PCD_HandleTypeDef *hpcd)
 }
 
 /**
-  * @brief  Initializes the PCD MSP.
-  * @param  hpcd PCD handle
-  * @retval None
+  * @brief  初始化PCD MSP（MCU支持包）。
+  * @param  hpcd PCD句柄
+  * @retval 无
   */
 __weak void HAL_PCD_MspInit(PCD_HandleTypeDef *hpcd)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译器警告未使用的参数 */
   UNUSED(hpcd);
 
-  /* NOTE : This function should not be modified, when the callback is needed,
-            the HAL_PCD_MspInit could be implemented in the user file
+  /* 注意：当需要回调函数时，不应修改此函数，
+            用户可以在用户文件中实现HAL_PCD_MspInit
    */
 }
 
@@ -955,17 +954,17 @@ HAL_StatusTypeDef HAL_PCD_UnRegisterLpmCallback(PCD_HandleTypeDef *hpcd)
   */
 
 /**
-  * @brief  Start the USB device
-  * @param  hpcd PCD handle
-  * @retval HAL status
+  * @brief  启动USB设备
+  * @param  hpcd PCD句柄
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_PCD_Start(PCD_HandleTypeDef *hpcd)
 {
-  __HAL_LOCK(hpcd);
-  (void)USB_DevConnect(hpcd->Instance);
-  __HAL_PCD_ENABLE(hpcd);
-  __HAL_UNLOCK(hpcd);
-  return HAL_OK;
+  __HAL_LOCK(hpcd);  // 锁定HAL PCD设备，防止它在关键阶段被其他代码中断
+  (void)USB_DevConnect(hpcd->Instance);  // 连接指定的USB设备
+  __HAL_PCD_ENABLE(hpcd);  // 使能HAL PCD设备
+  __HAL_UNLOCK(hpcd);  // 解锁HAL PCD设备，使其他代码可以访问
+  return HAL_OK;  // 返回操作成功状态
 }
 
 /**

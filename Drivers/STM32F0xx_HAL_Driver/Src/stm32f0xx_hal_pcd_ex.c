@@ -62,57 +62,56 @@
   */
 
 /**
-  * @brief  Configure PMA for EP
-  * @param  hpcd  Device instance
-  * @param  ep_addr endpoint address
-  * @param  ep_kind endpoint Kind
-  *                  USB_SNG_BUF: Single Buffer used
-  *                  USB_DBL_BUF: Double Buffer used
-  * @param  pmaadress: EP address in The PMA: In case of single buffer endpoint
-  *                   this parameter is 16-bit value providing the address
-  *                   in PMA allocated to endpoint.
-  *                   In case of double buffer endpoint this parameter
-  *                   is a 32-bit value providing the endpoint buffer 0 address
-  *                   in the LSB part of 32-bit value and endpoint buffer 1 address
-  *                   in the MSB part of 32-bit value.
-  * @retval HAL status
+  * @brief  为端点配置PMA（物理内存地址）
+  * @param  hpcd: 设备实例
+  * @param  ep_addr: 端点地址
+  * @param  ep_kind: 端点类型
+  *                  USB_SNG_BUF: 使用单缓冲区
+  *                  USB_DBL_BUF: 使用双缓冲区
+  * @param  pmaadress: PMA中的端点地址。对于单缓冲区端点，
+  *                   此参数是16位值，提供分配给端点的PMA地址。
+  *                   对于双缓冲区端点，此参数是32位值，
+  *                   在32位值的LSB部分提供端点缓冲区0地址，
+  *                   在MSB部分提供端点缓冲区1地址。
+  * @retval HAL状态
   */
-
-HAL_StatusTypeDef  HAL_PCDEx_PMAConfig(PCD_HandleTypeDef *hpcd,
-                                       uint16_t ep_addr,
-                                       uint16_t ep_kind,
-                                       uint32_t pmaadress)
+HAL_StatusTypeDef HAL_PCDEx_PMAConfig(PCD_HandleTypeDef *hpcd,
+                                      uint16_t ep_addr,
+                                      uint16_t ep_kind,
+                                      uint32_t pmaadress)
 {
   PCD_EPTypeDef *ep;
 
-  /* initialize ep structure*/
+  /* 初始化端点结构 */
   if ((0x80U & ep_addr) == 0x80U)
   {
-    ep = &hpcd->IN_ep[ep_addr & EP_ADDR_MSK];
+    // 如果端点地址的最高位（D7）是1，则表示这是一个IN（设备到主机）端点
+    ep = &hpcd->IN_ep[ep_addr & EP_ADDR_MSK];  // 获取对应的端点结构地址
   }
   else
   {
-    ep = &hpcd->OUT_ep[ep_addr];
+    // 否则，这是一个OUT（主机到设备）端点
+    ep = &hpcd->OUT_ep[ep_addr];  // 获取对应的端点结构地址
   }
 
-  /* Here we check if the endpoint is single or double Buffer*/
+  /* 在此我们检查端点是单缓冲还是双缓冲 */
   if (ep_kind == PCD_SNG_BUF)
   {
-    /* Single Buffer */
-    ep->doublebuffer = 0U;
-    /* Configure the PMA */
-    ep->pmaadress = (uint16_t)pmaadress;
+    /* 单缓冲 */
+    ep->doublebuffer = 0U;  // 设置为单缓冲
+    /* 配置PMA */
+    ep->pmaadress = (uint16_t)pmaadress;  // 设置PMA地址
   }
   else /* USB_DBL_BUF */
   {
-    /* Double Buffer Endpoint */
-    ep->doublebuffer = 1U;
-    /* Configure the PMA */
-    ep->pmaaddr0 = (uint16_t)(pmaadress & 0xFFFFU);
-    ep->pmaaddr1 = (uint16_t)((pmaadress & 0xFFFF0000U) >> 16);
+    /* 双缓冲端点 */
+    ep->doublebuffer = 1U;  // 设置为双缓冲
+    /* 配置PMA */
+    ep->pmaaddr0 = (uint16_t)(pmaadress & 0xFFFFU);  // 设置PMA地址的低16位
+    ep->pmaaddr1 = (uint16_t)((pmaadress & 0xFFFF0000U) >> 16);  // 设置PMA地址的高16位
   }
 
-  return HAL_OK;
+  return HAL_OK;  // 配置成功，返回HAL_OK
 }
 
 /**
@@ -247,9 +246,9 @@ void HAL_PCDEx_BCD_VBUSDetect(PCD_HandleTypeDef *hpcd)
 
 
 /**
-  * @brief  Activate LPM feature.
-  * @param  hpcd PCD handle
-  * @retval HAL status
+  * @brief  激活LPM功能。
+  * @param  hpcd PCD句柄
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef *hpcd)
 {
@@ -258,8 +257,8 @@ HAL_StatusTypeDef HAL_PCDEx_ActivateLPM(PCD_HandleTypeDef *hpcd)
   hpcd->lpm_active = 1U;
   hpcd->LPM_State = LPM_L0;
 
-  USBx->LPMCSR |= USB_LPMCSR_LMPEN;
-  USBx->LPMCSR |= USB_LPMCSR_LPMACK;
+  USBx->LPMCSR |= USB_LPMCSR_LMPEN; // 启用LPM
+  USBx->LPMCSR |= USB_LPMCSR_LPMACK; // 确认LPM
 
   return HAL_OK;
 }

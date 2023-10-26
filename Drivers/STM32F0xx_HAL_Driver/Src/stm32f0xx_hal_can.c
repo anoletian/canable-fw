@@ -1,137 +1,137 @@
 /**
-  ******************************************************************************
-  * @file    stm32f0xx_hal_can.c
-  * @author  MCD Application Team
-  * @brief   CAN HAL module driver.
-  *          This file provides firmware functions to manage the following
-  *          functionalities of the Controller Area Network (CAN) peripheral:
-  *           + Initialization and de-initialization functions
-  *           + Configuration functions
-  *           + Control functions
-  *           + Interrupts management
-  *           + Callbacks functions
-  *           + Peripheral State and Error functions
-  *
-  @verbatim
-  ==============================================================================
-                        ##### How to use this driver #####
-  ==============================================================================
+   ****************************************************** **************************
+   * @文件stm32f0xx_hal_can.c
+   * @author MCD 应用团队
+   * @brief CAN HAL 模块驱动程序。
+   * 该文件提供固件功能来管理以下内容
+   * 控制器局域网 (CAN) 外设的功能：
+   * + 初始化和反初始化函数
+   * + 配置函数
+   * + 控制功能
+   * + 中断管理
+   * + 回调函数
+   * + 外设状态和错误函数
+   *
+   @逐字
+   =================================================== ===========================
+                         #####如何使用此驱动#####
+   =================================================== ===========================
     [..]
-      (#) Initialize the CAN low level resources by implementing the
-          HAL_CAN_MspInit():
-         (++) Enable the CAN interface clock using __HAL_RCC_CANx_CLK_ENABLE()
-         (++) Configure CAN pins
-             (+++) Enable the clock for the CAN GPIOs
-             (+++) Configure CAN pins as alternate function open-drain
-         (++) In case of using interrupts (e.g. HAL_CAN_ActivateNotification())
-             (+++) Configure the CAN interrupt priority using
-                   HAL_NVIC_SetPriority()
-             (+++) Enable the CAN IRQ handler using HAL_NVIC_EnableIRQ()
-             (+++) In CAN IRQ handler, call HAL_CAN_IRQHandler()
+(#) 通过执行以下命令来初始化 CAN 低级资源
+           HAL_CAN_MspInit()：
+          (++) 使用 __HAL_RCC_CANx_CLK_ENABLE() 启用 CAN 接口时钟
+          (++) 配置 CAN 引脚
+              (+++) 启用 CAN GPIO 的时钟
+              (+++) 将 CAN 引脚配置为备用功能开漏
+          (++) 如果使用中断（例如 HAL_CAN_ActivateNotification()）
+              (+++) 使用以下命令配置 CAN 中断优先级
+                    HAL_NVIC_SetPriority()
+              (+++) 使用 HAL_NVIC_EnableIRQ() 启用 CAN IRQ 处理程序
+              (+++) 在 CAN IRQ 处理程序中，调用 HAL_CAN_IRQHandler()
 
-      (#) Initialize the CAN peripheral using HAL_CAN_Init() function. This
-          function resorts to HAL_CAN_MspInit() for low-level initialization.
+       (#) 使用 HAL_CAN_Init() 函数初始化 CAN 外设。 这
+           函数求助于 HAL_CAN_MspInit() 进行低级初始化。
 
-      (#) Configure the reception filters using the following configuration
-          functions:
-            (++) HAL_CAN_ConfigFilter()
+       (#) 使用以下配置配置接收过滤器
+           功能：
+             (++) HAL_CAN_ConfigFilter()
 
-      (#) Start the CAN module using HAL_CAN_Start() function. At this level
-          the node is active on the bus: it receive messages, and can send
-          messages.
+       (#) 使用 HAL_CAN_Start() 函数启动 CAN 模块。 在这个级别
+           该节点在总线上处于活动状态：它接收消息，并且可以发送
+           消息。
 
-      (#) To manage messages transmission, the following Tx control functions
-          can be used:
-            (++) HAL_CAN_AddTxMessage() to request transmission of a new
-                 message.
-            (++) HAL_CAN_AbortTxRequest() to abort transmission of a pending
-                 message.
-            (++) HAL_CAN_GetTxMailboxesFreeLevel() to get the number of free Tx
-                 mailboxes.
-            (++) HAL_CAN_IsTxMessagePending() to check if a message is pending
-                 in a Tx mailbox.
-            (++) HAL_CAN_GetTxTimestamp() to get the timestamp of Tx message
-                 sent, if time triggered communication mode is enabled.
+       (#) 为了管理消息传输，以下 Tx 控制函数
+           可以使用：
+             (++) HAL_CAN_AddTxMessage() 请求传输新消息
+                  信息。
+             (++) HAL_CAN_AbortTxRequest() 中止待处理的传输
+                  信息。
+             (++) HAL_CAN_GetTxMailboxesFreeLevel() 获取空闲 Tx 数量
+                  邮箱。
+             (++) HAL_CAN_IsTxMessagePending() 检查消息是否待处理
+                  在 Tx 邮箱中。
+             (++) HAL_CAN_GetTxTimestamp() 获取Tx消息的时间戳
+                  如果启用了时间触发通信模式，则发送。
 
-      (#) When a message is received into the CAN Rx FIFOs, it can be retrieved
-          using the HAL_CAN_GetRxMessage() function. The function
-          HAL_CAN_GetRxFifoFillLevel() allows to know how many Rx message are
-          stored in the Rx Fifo.
+       (#) 当 CAN Rx FIFO 接收到消息时，可以检索该消息
+           使用 HAL_CAN_GetRxMessage() 函数。 功能
+           HAL_CAN_GetRxFifoFillLevel() 允许知道有多少个 Rx 消息
+           存储在 Rx Fifo 中。
 
-      (#) Calling the HAL_CAN_Stop() function stops the CAN module.
+       (#) 调用HAL_CAN_Stop()函数停止CAN模块。
 
-      (#) The deinitialization is achieved with HAL_CAN_DeInit() function.
+       (#) 去初始化是通过 HAL_CAN_DeInit() 函数实现的。
 
 
-      *** Polling mode operation ***
-      ==============================
-    [..]
-      (#) Reception:
-            (++) Monitor reception of message using HAL_CAN_GetRxFifoFillLevel()
-                 until at least one message is received.
-            (++) Then get the message using HAL_CAN_GetRxMessage().
+*** 轮询模式操作 ***
+       ================================
+[..]
+       （＃） 接收：
+             (++) 使用 HAL_CAN_GetRxFifoFillLevel() 监视消息的接收
+                  直到至少收到一条消息。
+             (++) 然后使用 HAL_CAN_GetRxMessage() 获取消息。
 
-      (#) Transmission:
-            (++) Monitor the Tx mailboxes availability until at least one Tx
-                 mailbox is free, using HAL_CAN_GetTxMailboxesFreeLevel().
-            (++) Then request transmission of a message using
-                 HAL_CAN_AddTxMessage().
+       （＃） 发送：
+             (++) 监控 Tx 邮箱的可用性，直到至少有一个 Tx
+                  邮箱是免费的，使用 HAL_CAN_GetTxMailboxesFreeLevel()。
+             (++) 然后使用请求传输消息
+                  HAL_CAN_AddTxMessage()。
 
 
       *** Interrupt mode operation ***
       ================================
     [..]
-      (#) Notifications are activated using HAL_CAN_ActivateNotification()
-          function. Then, the process can be controlled through the
-          available user callbacks: HAL_CAN_xxxCallback(), using same APIs
-          HAL_CAN_GetRxMessage() and HAL_CAN_AddTxMessage().
+      (#) 使用 HAL_CAN_ActivateNotification() 激活通知
+           功能。 然后，可以通过以下方式控制该过程
+           可用的用户回调：HAL_CAN_xxxCallback()，使用相同的 API
+           HAL_CAN_GetRxMessage() 和 HAL_CAN_AddTxMessage()。
 
-      (#) Notifications can be deactivated using
-          HAL_CAN_DeactivateNotification() function.
+       (#) 可以使用以下命令停用通知
+           HAL_CAN_DeactivateNotification() 函数。
 
-      (#) Special care should be taken for CAN_IT_RX_FIFO0_MSG_PENDING and
-          CAN_IT_RX_FIFO1_MSG_PENDING notifications. These notifications trig
-          the callbacks HAL_CAN_RxFIFO0MsgPendingCallback() and
-          HAL_CAN_RxFIFO1MsgPendingCallback(). User has two possible options
-          here.
-            (++) Directly get the Rx message in the callback, using
-                 HAL_CAN_GetRxMessage().
-            (++) Or deactivate the notification in the callback without
-                 getting the Rx message. The Rx message can then be got later
-                 using HAL_CAN_GetRxMessage(). Once the Rx message have been
-                 read, the notification can be activated again.
+       (#) 应特别注意 CAN_IT_RX_FIFO0_MSG_PENDING 和
+           CAN_IT_RX_FIFO1_MSG_PENDING 通知。 这些通知触发
+           回调 HAL_CAN_RxFIFO0MsgPendingCallback() 和
+           HAL_CAN_RxFIFO1MsgPendingCallback()。 用户有两种可能的选择
+           这里。
+             (++) 直接在回调中获取Rx消息，使用
+                  HAL_CAN_GetRxMessage()。
+             (++) 或者在回调中停用通知而无需
+                  获取 Rx 消息。 稍后可以获取 Rx 消息
+                  使用 HAL_CAN_GetRxMessage()。 一旦 Rx 消息被接收
+                  阅读后，可以再次激活通知。
 
 
       *** Sleep mode ***
       ==================
     [..]
-      (#) The CAN peripheral can be put in sleep mode (low power), using
-          HAL_CAN_RequestSleep(). The sleep mode will be entered as soon as the
-          current CAN activity (transmission or reception of a CAN frame) will
-          be completed.
+      (#) CAN 外设可置于睡眠模式（低功耗），使用
+           HAL_CAN_RequestSleep()。 一旦出现，将进入睡眠模式
+           当前 CAN 活动（CAN 帧的传输或接收）将
+           完成。
 
-      (#) A notification can be activated to be informed when the sleep mode
-          will be entered.
+       (#) 睡眠模式时可以激活通知以得到通知
+           将被输入。
 
-      (#) It can be checked if the sleep mode is entered using
-          HAL_CAN_IsSleepActive().
-          Note that the CAN state (accessible from the API HAL_CAN_GetState())
-          is HAL_CAN_STATE_SLEEP_PENDING as soon as the sleep mode request is
-          submitted (the sleep mode is not yet entered), and become
-          HAL_CAN_STATE_SLEEP_ACTIVE when the sleep mode is effective.
+       (#) 可以使用以下命令检查是否进入睡眠模式
+           HAL_CAN_IsSleepActive()。
+           请注意 CAN 状态（可通过 API HAL_CAN_GetState() 访问）
+           一旦睡眠模式请求为 HAL_CAN_STATE_SLEEP_PENDING
+           提交（尚未进入休眠模式），变成
+           HAL_CAN_STATE_SLEEP_ACTIVE 当睡眠模式有效时。
 
-      (#) The wake-up from sleep mode can be trigged by two ways:
-            (++) Using HAL_CAN_WakeUp(). When returning from this function,
-                 the sleep mode is exited (if return status is HAL_OK).
-            (++) When a start of Rx CAN frame is detected by the CAN peripheral,
-                 if automatic wake up mode is enabled.
+       (#)从睡眠模式唤醒可以通过两种方式触发：
+             (++) 使用 HAL_CAN_WakeUp()。 当从此函数返回时，
+                  退出睡眠模式（如果返回状态为 HAL_OK）。
+             (++) 当 CAN 外设检测到 Rx CAN 帧的开始时，
+                  如果启用自动唤醒模式。
 
   *** Callback registration ***
   =============================================
 
-  The compilation define  USE_HAL_CAN_REGISTER_CALLBACKS when set to 1
-  allows the user to configure dynamically the driver callbacks.
-  Use Function @ref HAL_CAN_RegisterCallback() to register an interrupt callback.
+  当编译定义 USE_HAL_CAN_REGISTER_CALLBACKS 设置为1时，
+  允许用户动态配置驱动程序回调。
+  使用函数 @ref HAL_CAN_RegisterCallback() 来注册中断回调.
 
   Function @ref HAL_CAN_RegisterCallback() allows to register following callbacks:
     (+) TxMailbox0CompleteCallback   : Tx Mailbox 0 Complete Callback.
@@ -149,8 +149,7 @@
     (+) ErrorCallback                : Error Callback.
     (+) MspInitCallback              : CAN MspInit.
     (+) MspDeInitCallback            : CAN MspDeInit.
-  This function takes as parameters the HAL peripheral handle, the Callback ID
-  and a pointer to the user callback function.
+  此函数接受HAL外设句柄、回调ID和指向用户回调函数的指针作为参数。
 
   Use function @ref HAL_CAN_UnRegisterCallback() to reset a callback to the default
   weak function.
@@ -173,26 +172,21 @@
     (+) MspInitCallback              : CAN MspInit.
     (+) MspDeInitCallback            : CAN MspDeInit.
 
-  By default, after the @ref HAL_CAN_Init() and when the state is HAL_CAN_STATE_RESET,
-  all callbacks are set to the corresponding weak functions:
-  example @ref HAL_CAN_ErrorCallback().
-  Exception done for MspInit and MspDeInit functions that are
-  reset to the legacy weak function in the @ref HAL_CAN_Init()/ @ref HAL_CAN_DeInit() only when
-  these callbacks are null (not registered beforehand).
-  if not, MspInit or MspDeInit are not null, the @ref HAL_CAN_Init()/ @ref HAL_CAN_DeInit()
-  keep and use the user MspInit/MspDeInit callbacks (registered beforehand)
+  默认情况下，在 @ref HAL_CAN_Init() 之后，当状态是 HAL_CAN_STATE_RESET 时，
+  所有回调都设置为相应的弱函数：例如 @ref HAL_CAN_ErrorCallback()。
+  对于 MspInit 和 MspDeInit 函数来说，只有当这些回调为空（未在之前注册）时，
+  它们在 @ref HAL_CAN_Init()/ @ref HAL_CAN_DeInit() 中才会被重置为传统的弱功能。
+  如果不是，MspInit 或 MspDeInit 不为空，那么 @ref HAL_CAN_Init()/ @ref HAL_CAN_DeInit()
+  会保留并使用用户之前注册的 MspInit/MspDeInit 回调。
 
-  Callbacks can be registered/unregistered in HAL_CAN_STATE_READY state only.
-  Exception done MspInit/MspDeInit that can be registered/unregistered
-  in HAL_CAN_STATE_READY or HAL_CAN_STATE_RESET state,
-  thus registered (user) MspInit/DeInit callbacks can be used during the Init/DeInit.
-  In that case first register the MspInit/MspDeInit user callbacks
-  using @ref HAL_CAN_RegisterCallback() before calling @ref HAL_CAN_DeInit()
-  or @ref HAL_CAN_Init() function.
+  回调可以仅在 HAL_CAN_STATE_READY 状态下注册/注销。
+  唯一的例外是 MspInit/MspDeInit，可以在 HAL_CAN_STATE_READY 或 HAL_CAN_STATE_RESET 状态下注册/注销，
+  因此可以在 Init/DeInit 过程中使用已注册的（用户）MspInit/DeInit 回调。
+  在这种情况下，首先使用 @ref HAL_CAN_RegisterCallback() 注册 MspInit/MspDeInit 用户回调，
+  然后再调用 @ref HAL_CAN_DeInit() 或 @ref HAL_CAN_Init() 函数。
 
-  When The compilation define USE_HAL_CAN_REGISTER_CALLBACKS is set to 0 or
-  not defined, the callback registration feature is not available and all callbacks
-  are set to the corresponding weak functions.
+  当编译定义 USE_HAL_CAN_REGISTER_CALLBACKS 设置为 0 或未定义时，
+  回调注册功能不可用，所有回调都设置为相应的弱函数。 
 
   @endverbatim
   ******************************************************************************
@@ -231,17 +225,17 @@
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-/** @defgroup CAN_Private_Constants CAN Private Constants
+/** @defgroup CAN_Private_Constants CAN 私有常量
   * @{
   */
 #define CAN_TIMEOUT_VALUE 10U
 /**
   * @}
   */
-/* Private macro -------------------------------------------------------------*/
-/* Private variables ---------------------------------------------------------*/
-/* Private function prototypes -----------------------------------------------*/
-/* Exported functions --------------------------------------------------------*/
+/* 私有宏 ---------------------------------------------------------- ---------------*/
+/* 私有变量 ---------------------------------------------- -----------*/
+/* 私有函数原型-------------------------------------------- --*/
+/* 导出函数 ---------------------------------------------- ----------*/
 
 /** @defgroup CAN_Exported_Functions CAN Exported Functions
   * @{
@@ -259,17 +253,17 @@
       (+) HAL_CAN_DeInit                     : De-initialize the CAN.
       (+) HAL_CAN_MspInit                    : Initialize the CAN MSP.
       (+) HAL_CAN_MspDeInit                  : DeInitialize the CAN MSP.
+note:在HAL库（硬件抽象层库）的语境中，MSP通常指的是"MCU Specific Package"，
+     其基本概念是指针对特定微控制器家族或型号的软件支持包，这些软件支持包包含了针对该特定硬件的初始化和配置代码。
 
 @endverbatim
   * @{
   */
 
 /**
-  * @brief  Initializes the CAN peripheral according to the specified
-  *         parameters in the CAN_InitStruct.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status
+  * @brief  根据 CAN_InitStruct 中指定的参数初始化 CAN 外设。
+  * @param  hcan 指向包含指定 CAN 的配置信息的 CAN_HandleTypeDef 结构体的指针。
+  * @retval HAL 状态
   */
 HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef *hcan)
 {
@@ -450,110 +444,105 @@ HAL_StatusTypeDef HAL_CAN_Init(CAN_HandleTypeDef *hcan)
 }
 
 /**
-  * @brief  Deinitializes the CAN peripheral registers to their default
-  *         reset values.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status
+  * @brief  将 CAN 外设寄存器复位为其默认值。
+  * @param  hcan 指向包含指定 CAN 配置信息的 CAN_HandleTypeDef 结构体的指针。
+  * @retval HAL 状态
   */
 HAL_StatusTypeDef HAL_CAN_DeInit(CAN_HandleTypeDef *hcan)
 {
-  /* Check CAN handle */
+  /* 检查 CAN 句柄 */
   if (hcan == NULL)
   {
-    return HAL_ERROR;
+    return HAL_ERROR; // 如果句柄指针为空，则返回错误
   }
 
-  /* Check the parameters */
-  assert_param(IS_CAN_ALL_INSTANCE(hcan->Instance));
+  /* 检查参数 */
+  assert_param(IS_CAN_ALL_INSTANCE(hcan->Instance)); // 验证指向的实例是否正确
 
-  /* Stop the CAN module */
-  (void)HAL_CAN_Stop(hcan);
+  /* 停止 CAN 模块 */
+  (void)HAL_CAN_Stop(hcan); // 调用函数停止 CAN 操作
 
 #if USE_HAL_CAN_REGISTER_CALLBACKS == 1
   if (hcan->MspDeInitCallback == NULL)
   {
-    hcan->MspDeInitCallback = HAL_CAN_MspDeInit; /* Legacy weak MspDeInit */
+    hcan->MspDeInitCallback = HAL_CAN_MspDeInit; // 使用传统的弱 MspDeInit 回调
   }
 
-  /* DeInit the low level hardware: CLOCK, NVIC */
-  hcan->MspDeInitCallback(hcan);
+  /* 反初始化底层硬件：时钟，NVIC */
+  hcan->MspDeInitCallback(hcan); // 调用反初始化回调
 
 #else
-  /* DeInit the low level hardware: CLOCK, NVIC */
-  HAL_CAN_MspDeInit(hcan);
+  /* 反初始化底层硬件：时钟，NVIC */
+  HAL_CAN_MspDeInit(hcan); // 直接调用底层反初始化函数
 #endif /* (USE_HAL_CAN_REGISTER_CALLBACKS) */
 
-  /* Reset the CAN peripheral */
-  SET_BIT(hcan->Instance->MCR, CAN_MCR_RESET);
+  /* 复位 CAN 外设 */
+  SET_BIT(hcan->Instance->MCR, CAN_MCR_RESET); // 通过设置控制寄存器中的复位位来复位 CAN 外设
 
-  /* Reset the CAN ErrorCode */
-  hcan->ErrorCode = HAL_CAN_ERROR_NONE;
+  /* 重置 CAN 错误代码 */
+  hcan->ErrorCode = HAL_CAN_ERROR_NONE; // 清除可能存在的错误代码
 
-  /* Change CAN state */
-  hcan->State = HAL_CAN_STATE_RESET;
+  /* 改变 CAN 状态 */
+  hcan->State = HAL_CAN_STATE_RESET; // 设置句柄的状态为复位
 
-  /* Return function status */
-  return HAL_OK;
+  /* 返回函数状态 */
+  return HAL_OK; // 操作成功完成
 }
 
 /**
-  * @brief  Initializes the CAN MSP.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  初始化CAN MSP（微控制器支持包）。
+  * @param  hcan 指向包含指定CAN的配置信息的 CAN_HandleTypeDef 结构体的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_MspInit(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止未使用的参数编译警告 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_MspInit could be implemented in the user file
+  /* 注意：当需要回调函数时，不应修改此函数，
+           用户可以在用户文件中实现 HAL_CAN_MspInit
    */
 }
 
 /**
-  * @brief  DeInitializes the CAN MSP.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  反初始化CAN MSP（微控制器支持包）。
+  * @param  hcan 指向包含指定CAN的配置信息的 CAN_HandleTypeDef 结构体的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_MspDeInit(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止未使用的参数编译警告 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_MspDeInit could be implemented in the user file
+  /* 注意：当需要回调函数时，不应修改此函数，
+           用户可以在用户文件中实现 HAL_CAN_MspDeInit
    */
 }
 
 #if USE_HAL_CAN_REGISTER_CALLBACKS == 1
 /**
-  * @brief  Register a CAN CallBack.
-  *         To be used instead of the weak predefined callback
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for CAN module
-  * @param  CallbackID ID of the callback to be registered
-  *         This parameter can be one of the following values:
-  *           @arg @ref HAL_CAN_TX_MAILBOX0_COMPLETE_CALLBACK_CB_ID Tx Mailbox 0 Complete callback ID
-  *           @arg @ref HAL_CAN_TX_MAILBOX1_COMPLETE_CALLBACK_CB_ID Tx Mailbox 1 Complete callback ID
-  *           @arg @ref HAL_CAN_TX_MAILBOX2_COMPLETE_CALLBACK_CB_ID Tx Mailbox 2 Complete callback ID
-  *           @arg @ref HAL_CAN_TX_MAILBOX0_ABORT_CALLBACK_CB_ID Tx Mailbox 0 Abort callback ID
-  *           @arg @ref HAL_CAN_TX_MAILBOX1_ABORT_CALLBACK_CB_ID Tx Mailbox 1 Abort callback ID
-  *           @arg @ref HAL_CAN_TX_MAILBOX2_ABORT_CALLBACK_CB_ID Tx Mailbox 2 Abort callback ID
-  *           @arg @ref HAL_CAN_RX_FIFO0_MSG_PENDING_CALLBACK_CB_ID Rx Fifo 0 message pending callback ID
-  *           @arg @ref HAL_CAN_RX_FIFO0_FULL_CALLBACK_CB_ID Rx Fifo 0 full callback ID
-  *           @arg @ref HAL_CAN_RX_FIFO1_MSGPENDING_CALLBACK_CB_ID Rx Fifo 1 message pending callback ID
-  *           @arg @ref HAL_CAN_RX_FIFO1_FULL_CALLBACK_CB_ID Rx Fifo 1 full callback ID
-  *           @arg @ref HAL_CAN_SLEEP_CALLBACK_CB_ID Sleep callback ID
-  *           @arg @ref HAL_CAN_WAKEUP_FROM_RX_MSG_CALLBACK_CB_ID Wake Up from Rx message callback ID
-  *           @arg @ref HAL_CAN_ERROR_CALLBACK_CB_ID Error callback ID
-  *           @arg @ref HAL_CAN_MSPINIT_CB_ID MspInit callback ID
-  *           @arg @ref HAL_CAN_MSPDEINIT_CB_ID MspDeInit callback ID
-  * @param  pCallback pointer to the Callback function
-  * @retval HAL status
+  * @brief  注册一个CAN回调。
+  *         用于替代弱预定义回调
+  * @param  hcan 指向包含CAN模块配置信息的CAN_HandleTypeDef结构体的指针
+  * @param  CallbackID 需要注册的回调的ID
+  *         此参数可以是以下值之一：
+  *           @arg @ref HAL_CAN_TX_MAILBOX0_COMPLETE_CALLBACK_CB_ID 发送邮箱0完成回调ID
+  *           @arg @ref HAL_CAN_TX_MAILBOX1_COMPLETE_CALLBACK_CB_ID 发送邮箱1完成回调ID
+  *           @arg @ref HAL_CAN_TX_MAILBOX2_COMPLETE_CALLBACK_CB_ID 发送邮箱2完成回调ID
+  *           @arg @ref HAL_CAN_TX_MAILBOX0_ABORT_CALLBACK_CB_ID 发送邮箱0中止回调ID
+  *           @arg @ref HAL_CAN_TX_MAILBOX1_ABORT_CALLBACK_CB_ID 发送邮箱1中止回调ID
+  *           @arg @ref HAL_CAN_TX_MAILBOX2_ABORT_CALLBACK_CB_ID 发送邮箱2中止回调ID
+  *           @arg @ref HAL_CAN_RX_FIFO0_MSG_PENDING_CALLBACK_CB_ID 接收FIFO 0消息待处理回调ID
+  *           @arg @ref HAL_CAN_RX_FIFO0_FULL_CALLBACK_CB_ID 接收FIFO 0满回调ID
+  *           @arg @ref HAL_CAN_RX_FIFO1_MSG_PENDING_CALLBACK_CB_ID 接收FIFO 1消息待处理回调ID
+  *           @arg @ref HAL_CAN_RX_FIFO1_FULL_CALLBACK_CB_ID 接收FIFO 1满回调ID
+  *           @arg @ref HAL_CAN_SLEEP_CALLBACK_CB_ID 睡眠回调ID
+  *           @arg @ref HAL_CAN_WAKEUP_FROM_RX_MSG_CALLBACK_CB_ID 从接收消息唤醒回调ID
+  *           @arg @ref HAL_CAN_ERROR_CALLBACK_CB_ID 错误回调ID
+  *           @arg @ref HAL_CAN_MSPINIT_CB_ID MspInit回调ID
+  *           @arg @ref HAL_CAN_MSPDEINIT_CB_ID MspDeInit回调ID
+  * @param  pCallback 指向回调函数的指针
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_RegisterCallback(CAN_HandleTypeDef *hcan, HAL_CAN_CallbackIDTypeDef CallbackID, void (* pCallback)(CAN_HandleTypeDef *_hcan))
 {
@@ -827,13 +816,10 @@ HAL_StatusTypeDef HAL_CAN_UnRegisterCallback(CAN_HandleTypeDef *hcan, HAL_CAN_Ca
   */
 
 /**
-  * @brief  Configures the CAN reception filter according to the specified
-  *         parameters in the CAN_FilterInitStruct.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  sFilterConfig pointer to a CAN_FilterTypeDef structure that
-  *         contains the filter configuration information.
-  * @retval None
+  * @brief  根据CAN_FilterInitStruct中指定的参数配置CAN接收过滤器。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @param  sFilterConfig 指向包含过滤器配置信息的CAN_FilterTypeDef结构体的指针。
+  * @retval 无
   */
 HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, CAN_FilterTypeDef *sFilterConfig)
 {
@@ -980,10 +966,9 @@ HAL_StatusTypeDef HAL_CAN_ConfigFilter(CAN_HandleTypeDef *hcan, CAN_FilterTypeDe
   */
 
 /**
-  * @brief  Start the CAN module.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status
+  * @brief  启动CAN模块。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_Start(CAN_HandleTypeDef *hcan)
 {
@@ -991,40 +976,40 @@ HAL_StatusTypeDef HAL_CAN_Start(CAN_HandleTypeDef *hcan)
 
   if (hcan->State == HAL_CAN_STATE_READY)
   {
-    /* Change CAN peripheral state */
+    /* 改变CAN外设状态 */
     hcan->State = HAL_CAN_STATE_LISTENING;
 
-    /* Request leave initialisation */
+    /* 请求离开初始化状态 */
     CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_INRQ);
 
-    /* Get tick */
+    /* 获取时刻 */
     tickstart = HAL_GetTick();
 
-    /* Wait the acknowledge */
+    /* 等待确认 */
     while ((hcan->Instance->MSR & CAN_MSR_INAK) != 0U)
     {
-      /* Check for the Timeout */
+      /* 检查超时 */
       if ((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
       {
-        /* Update error code */
+        /* 更新错误代码 */
         hcan->ErrorCode |= HAL_CAN_ERROR_TIMEOUT;
 
-        /* Change CAN state */
+        /* 改变CAN状态 */
         hcan->State = HAL_CAN_STATE_ERROR;
 
         return HAL_ERROR;
       }
     }
 
-    /* Reset the CAN ErrorCode */
+    /* 重置CAN错误代码 */
     hcan->ErrorCode = HAL_CAN_ERROR_NONE;
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_READY;
 
     return HAL_ERROR;
@@ -1032,10 +1017,9 @@ HAL_StatusTypeDef HAL_CAN_Start(CAN_HandleTypeDef *hcan)
 }
 
 /**
-  * @brief  Stop the CAN module and enable access to configuration registers.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status
+  * @brief  停止CAN模块并允许访问配置寄存器。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_Stop(CAN_HandleTypeDef *hcan)
 {
@@ -1043,40 +1027,40 @@ HAL_StatusTypeDef HAL_CAN_Stop(CAN_HandleTypeDef *hcan)
 
   if (hcan->State == HAL_CAN_STATE_LISTENING)
   {
-    /* Request initialisation */
+    /* 请求初始化 */
     SET_BIT(hcan->Instance->MCR, CAN_MCR_INRQ);
 
-    /* Get tick */
+    /* 获取时刻 */
     tickstart = HAL_GetTick();
 
-    /* Wait the acknowledge */
+    /* 等待确认 */
     while ((hcan->Instance->MSR & CAN_MSR_INAK) == 0U)
     {
-      /* Check for the Timeout */
+      /* 检查超时 */
       if ((HAL_GetTick() - tickstart) > CAN_TIMEOUT_VALUE)
       {
-        /* Update error code */
+        /* 更新错误代码 */
         hcan->ErrorCode |= HAL_CAN_ERROR_TIMEOUT;
 
-        /* Change CAN state */
+        /* 改变CAN状态 */
         hcan->State = HAL_CAN_STATE_ERROR;
 
         return HAL_ERROR;
       }
     }
 
-    /* Exit from sleep mode */
+    /* 退出睡眠模式 */
     CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_SLEEP);
 
-    /* Change CAN peripheral state */
+    /* 改变CAN外设状态 */
     hcan->State = HAL_CAN_STATE_READY;
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_STARTED;
 
     return HAL_ERROR;
@@ -1084,13 +1068,11 @@ HAL_StatusTypeDef HAL_CAN_Stop(CAN_HandleTypeDef *hcan)
 }
 
 /**
-  * @brief  Request the sleep mode (low power) entry.
-  *         When returning from this function, Sleep mode will be entered
-  *         as soon as the current CAN activity (transmission or reception
-  *         of a CAN frame) has been completed.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status.
+  * @brief  请求进入睡眠模式（低功耗模式）。
+  *         从此函数返回后，一旦当前的CAN活动（传输或接收
+  *         CAN帧）完成，将立即进入睡眠模式。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_RequestSleep(CAN_HandleTypeDef *hcan)
 {
@@ -1099,29 +1081,27 @@ HAL_StatusTypeDef HAL_CAN_RequestSleep(CAN_HandleTypeDef *hcan)
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Request Sleep mode */
+    /* 请求睡眠模式 */
     SET_BIT(hcan->Instance->MCR, CAN_MCR_SLEEP);
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_ERROR;
   }
 }
 
 /**
-  * @brief  Wake up from sleep mode.
-  *         When returning with HAL_OK status from this function, Sleep mode
-  *         is exited.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status.
+  * @brief  从睡眠模式中唤醒。
+  *         当此函数返回HAL_OK状态时，将退出睡眠模式。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @retval HAL状态。
   */
 HAL_StatusTypeDef HAL_CAN_WakeUp(CAN_HandleTypeDef *hcan)
 {
@@ -1132,19 +1112,19 @@ HAL_StatusTypeDef HAL_CAN_WakeUp(CAN_HandleTypeDef *hcan)
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Wake up request */
+    /* 发出唤醒请求 */
     CLEAR_BIT(hcan->Instance->MCR, CAN_MCR_SLEEP);
 
-    /* Wait sleep mode is exited */
+    /* 等待退出睡眠模式 */
     do
     {
-      /* Increment counter */
+      /* 计数器递增 */
       count++;
 
-      /* Check if timeout is reached */
+      /* 检查是否达到超时 */
       if (count > timeout)
       {
-        /* Update error code */
+        /* 更新错误码 */
         hcan->ErrorCode |= HAL_CAN_ERROR_TIMEOUT;
 
         return HAL_ERROR;
@@ -1152,25 +1132,25 @@ HAL_StatusTypeDef HAL_CAN_WakeUp(CAN_HandleTypeDef *hcan)
     }
     while ((hcan->Instance->MSR & CAN_MSR_SLAK) != 0U);
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
 
+    /* 返回函数状态 */
     return HAL_ERROR;
   }
 }
 
 /**
-  * @brief  Check is sleep mode is active.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval Status
-  *          - 0 : Sleep mode is not active.
-  *          - 1 : Sleep mode is active.
+  * @brief  检查睡眠模式是否激活。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @retval 状态
+  *          - 0 : 睡眠模式未激活。
+  *          - 1 : 睡眠模式已激活。
   */
 uint32_t HAL_CAN_IsSleepActive(CAN_HandleTypeDef *hcan)
 {
@@ -1180,28 +1160,25 @@ uint32_t HAL_CAN_IsSleepActive(CAN_HandleTypeDef *hcan)
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Check Sleep mode */
+    /* 检查睡眠模式 */
     if ((hcan->Instance->MSR & CAN_MSR_SLAK) != 0U)
     {
       status = 1U;
     }
   }
 
-  /* Return function status */
+  /* 返回函数状态 */
   return status;
 }
 
 /**
-  * @brief  Add a message to the first free Tx mailbox and activate the
-  *         corresponding transmission request.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  pHeader pointer to a CAN_TxHeaderTypeDef structure.
-  * @param  aData array containing the payload of the Tx frame.
-  * @param  pTxMailbox pointer to a variable where the function will return
-  *         the TxMailbox used to store the Tx message.
-  *         This parameter can be a value of @arg CAN_Tx_Mailboxes.
-  * @retval HAL status
+  * @brief  将消息添加到第一个空闲的Tx邮箱，并激活相应的传输请求。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构体的指针。
+  * @param  pHeader 指向CAN_TxHeaderTypeDef结构体的指针。
+  * @param  aData 包含Tx帧有效负载的数组。
+  * @param  pTxMailbox 函数将返回用于存储Tx消息的TxMailbox的指针变量。
+  *         该参数可以是 @arg CAN_Tx_Mailboxes 的值。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_AddTxMessage(CAN_HandleTypeDef *hcan, CAN_TxHeaderTypeDef *pHeader, uint8_t aData[], uint32_t *pTxMailbox)
 {
@@ -1304,295 +1281,291 @@ HAL_StatusTypeDef HAL_CAN_AddTxMessage(CAN_HandleTypeDef *hcan, CAN_TxHeaderType
 }
 
 /**
-  * @brief  Abort transmission requests
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  TxMailboxes List of the Tx Mailboxes to abort.
-  *         This parameter can be any combination of @arg CAN_Tx_Mailboxes.
-  * @retval HAL status
+  * @brief  中止传输请求
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  TxMailboxes 要中止的Tx邮箱列表。
+  *         此参数可以是 @arg CAN_Tx_Mailboxes 的任何组合。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_AbortTxRequest(CAN_HandleTypeDef *hcan, uint32_t TxMailboxes)
 {
   HAL_CAN_StateTypeDef state = hcan->State;
 
-  /* Check function parameters */
+  /* 检查函数参数 */
   assert_param(IS_CAN_TX_MAILBOX_LIST(TxMailboxes));
 
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Check Tx Mailbox 0 */
+    /* 检查Tx邮箱0 */
     if ((TxMailboxes & CAN_TX_MAILBOX0) != 0U)
     {
-      /* Add cancellation request for Tx Mailbox 0 */
+      /* 为Tx邮箱0添加取消请求 */
       SET_BIT(hcan->Instance->TSR, CAN_TSR_ABRQ0);
     }
 
-    /* Check Tx Mailbox 1 */
+    /* 检查Tx邮箱1 */
     if ((TxMailboxes & CAN_TX_MAILBOX1) != 0U)
     {
-      /* Add cancellation request for Tx Mailbox 1 */
+      /* 为Tx邮箱1添加取消请求 */
       SET_BIT(hcan->Instance->TSR, CAN_TSR_ABRQ1);
     }
 
-    /* Check Tx Mailbox 2 */
+    /* 检查Tx邮箱2 */
     if ((TxMailboxes & CAN_TX_MAILBOX2) != 0U)
     {
-      /* Add cancellation request for Tx Mailbox 2 */
+      /* 为Tx邮箱2添加取消请求 */
       SET_BIT(hcan->Instance->TSR, CAN_TSR_ABRQ2);
     }
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
 
+    /* 返回错误状态 */
     return HAL_ERROR;
   }
 }
 
 /**
-  * @brief  Return Tx Mailboxes free level: number of free Tx Mailboxes.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval Number of free Tx Mailboxes.
+  * @brief  返回Tx邮箱的空闲级别：空闲Tx邮箱的数量。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 空闲Tx邮箱的数量。
   */
 uint32_t HAL_CAN_GetTxMailboxesFreeLevel(CAN_HandleTypeDef *hcan)
 {
-  uint32_t freelevel = 0U;
-  HAL_CAN_StateTypeDef state = hcan->State;
+  uint32_t freelevel = 0U;  // 空闲邮箱数量
+  HAL_CAN_StateTypeDef state = hcan->State;  // 当前CAN状态
 
   if ((state == HAL_CAN_STATE_READY) ||
-      (state == HAL_CAN_STATE_LISTENING))
+      (state == HAL_CAN_STATE_LISTENING))  // 判断是否准备好或正在监听
   {
-    /* Check Tx Mailbox 0 status */
-    if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U)
+    /* 检查Tx邮箱0的状态 */
+    if ((hcan->Instance->TSR & CAN_TSR_TME0) != 0U)  // 如果Tx邮箱0是空的
     {
-      freelevel++;
+      freelevel++;  // 空闲邮箱数量增加
     }
 
-    /* Check Tx Mailbox 1 status */
-    if ((hcan->Instance->TSR & CAN_TSR_TME1) != 0U)
+    /* 检查Tx邮箱1的状态 */
+    if ((hcan->Instance->TSR & CAN_TSR_TME1) != 0U)  // 如果Tx邮箱1是空的
     {
-      freelevel++;
+      freelevel++;  // 空闲邮箱数量增加
     }
 
-    /* Check Tx Mailbox 2 status */
-    if ((hcan->Instance->TSR & CAN_TSR_TME2) != 0U)
+    /* 检查Tx邮箱2的状态 */
+    if ((hcan->Instance->TSR & CAN_TSR_TME2) != 0U)  // 如果Tx邮箱2是空的
     {
-      freelevel++;
+      freelevel++;  // 空闲邮箱数量增加
     }
   }
 
-  /* Return Tx Mailboxes free level */
-  return freelevel;
+  /* 返回Tx邮箱的空闲级别 */
+  return freelevel;  // 返回空闲邮箱数量
 }
 
 /**
-  * @brief  Check if a transmission request is pending on the selected Tx
-  *         Mailboxes.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  TxMailboxes List of Tx Mailboxes to check.
-  *         This parameter can be any combination of @arg CAN_Tx_Mailboxes.
-  * @retval Status
-  *          - 0 : No pending transmission request on any selected Tx Mailboxes.
-  *          - 1 : Pending transmission request on at least one of the selected
-  *                Tx Mailbox.
+  * @brief  检查选定的Tx邮箱上是否有待定的传输请求。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  TxMailboxes 要检查的Tx邮箱列表。
+  *         该参数可以是 @arg CAN_Tx_Mailboxes 的任意组合。
+  * @retval 状态
+  *          - 0 : 在任何选定的Tx邮箱上都没有待定的传输请求。
+  *          - 1 : 在至少一个选定的Tx邮箱上有待定的传输请求。
   */
 uint32_t HAL_CAN_IsTxMessagePending(CAN_HandleTypeDef *hcan, uint32_t TxMailboxes)
 {
-  uint32_t status = 0U;
-  HAL_CAN_StateTypeDef state = hcan->State;
+  uint32_t status = 0U;  // 初始化状态值为0
+  HAL_CAN_StateTypeDef state = hcan->State;  // 获取当前CAN状态
 
-  /* Check function parameters */
-  assert_param(IS_CAN_TX_MAILBOX_LIST(TxMailboxes));
+  /* 检查函数参数 */
+  assert_param(IS_CAN_TX_MAILBOX_LIST(TxMailboxes));  // 确认Tx邮箱列表参数正确
 
   if ((state == HAL_CAN_STATE_READY) ||
-      (state == HAL_CAN_STATE_LISTENING))
+      (state == HAL_CAN_STATE_LISTENING))  // 如果CAN状态是就绪或监听中
   {
-    /* Check pending transmission request on the selected Tx Mailboxes */
+    /* 检查选定的Tx邮箱上是否有待定的传输请求 */
     if ((hcan->Instance->TSR & (TxMailboxes << CAN_TSR_TME0_Pos)) != (TxMailboxes << CAN_TSR_TME0_Pos))
     {
-      status = 1U;
+      status = 1U;  // 设置状态为1，表示有待定的传输请求
     }
   }
 
-  /* Return status */
-  return status;
+  /* 返回状态 */
+  return status;  // 返回表示待定传输请求存在与否的状态值
 }
 
 /**
-  * @brief  Return timestamp of Tx message sent, if time triggered communication
-            mode is enabled.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  TxMailbox Tx Mailbox where the timestamp of message sent will be
-  *         read.
-  *         This parameter can be one value of @arg CAN_Tx_Mailboxes.
-  * @retval Timestamp of message sent from Tx Mailbox.
+  * @brief  如果启用了时间触发通信模式，则返回发送的Tx消息的时间戳。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  TxMailbox 将读取发送消息的时间戳的Tx邮箱。
+  *         此参数可以是 @arg CAN_Tx_Mailboxes 的一个值。
+  * @retval 从Tx邮箱发送的消息的时间戳。
   */
 uint32_t HAL_CAN_GetTxTimestamp(CAN_HandleTypeDef *hcan, uint32_t TxMailbox)
 {
-  uint32_t timestamp = 0U;
-  uint32_t transmitmailbox;
-  HAL_CAN_StateTypeDef state = hcan->State;
+  uint32_t timestamp = 0U;  // 初始化时间戳
+  uint32_t transmitmailbox;  // 用于存储要检索的传输邮箱的索引
+  HAL_CAN_StateTypeDef state = hcan->State;  // 获取当前CAN状态
 
-  /* Check function parameters */
-  assert_param(IS_CAN_TX_MAILBOX(TxMailbox));
+  /* 检查函数参数 */
+  assert_param(IS_CAN_TX_MAILBOX(TxMailbox));  // 确认Tx邮箱参数正确
 
   if ((state == HAL_CAN_STATE_READY) ||
-      (state == HAL_CAN_STATE_LISTENING))
+      (state == HAL_CAN_STATE_LISTENING))  // 如果CAN状态是就绪或监听中
   {
-    /* Select the Tx mailbox */
-    /* Select the Tx mailbox */
-    if (TxMailbox == CAN_TX_MAILBOX0)
+    /* 选择Tx邮箱 */
+    if (TxMailbox == CAN_TX_MAILBOX0)  // 如果指定的是邮箱0
     {
-      transmitmailbox = 0U;
+      transmitmailbox = 0U;  // 索引设置为0
     }
-    else if (TxMailbox == CAN_TX_MAILBOX1)
+    else if (TxMailbox == CAN_TX_MAILBOX1)  // 如果指定的是邮箱1
     {
-      transmitmailbox = 1U;
+      transmitmailbox = 1U;  // 索引设置为1
     }
-    else /* (TxMailbox == CAN_TX_MAILBOX2) */
+    else /* (TxMailbox == CAN_TX_MAILBOX2) */  // 如果指定的是邮箱2
     {
-      transmitmailbox = 2U;
+      transmitmailbox = 2U;  // 索引设置为2
     }
 
-    /* Get timestamp */
+    /* 获取时间戳 */
+    // 从相应的Tx邮箱寄存器中提取时间戳信息，并进行适当的位移操作
     timestamp = (hcan->Instance->sTxMailBox[transmitmailbox].TDTR & CAN_TDT0R_TIME) >> CAN_TDT0R_TIME_Pos;
   }
 
-  /* Return the timestamp */
-  return timestamp;
+  /* 返回时间戳 */
+  return timestamp;  // 返回检索到的消息发送时间戳
 }
 
 /**
-  * @brief  Get an CAN frame from the Rx FIFO zone into the message RAM.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  RxFifo Fifo number of the received message to be read.
-  *         This parameter can be a value of @arg CAN_receive_FIFO_number.
-  * @param  pHeader pointer to a CAN_RxHeaderTypeDef structure where the header
-  *         of the Rx frame will be stored.
-  * @param  aData array where the payload of the Rx frame will be stored.
-  * @retval HAL status
+  * @brief  从Rx FIFO区域获取CAN帧到消息RAM中。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  RxFifo 要读取的已接收消息的Fifo编号。
+  *         此参数可以是 @arg CAN_receive_FIFO_number 的值。
+  * @param  pHeader 指向CAN_RxHeaderTypeDef结构的指针，其中将存储Rx帧的头部。
+  * @param  aData 数组，其中将存储Rx帧的有效负载。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_GetRxMessage(CAN_HandleTypeDef *hcan, uint32_t RxFifo, CAN_RxHeaderTypeDef *pHeader, uint8_t aData[])
 {
-  HAL_CAN_StateTypeDef state = hcan->State;
+  HAL_CAN_StateTypeDef state = hcan->State;  // 获取当前CAN状态
 
-  assert_param(IS_CAN_RX_FIFO(RxFifo));
+  assert_param(IS_CAN_RX_FIFO(RxFifo));  // 确认Rx FIFO参数有效
 
   if ((state == HAL_CAN_STATE_READY) ||
-      (state == HAL_CAN_STATE_LISTENING))
+      (state == HAL_CAN_STATE_LISTENING))  // 如果CAN状态是就绪或监听中
   {
-    /* Check the Rx FIFO */
-    if (RxFifo == CAN_RX_FIFO0) /* Rx element is assigned to Rx FIFO 0 */
+    /* 检查Rx FIFO */
+    if (RxFifo == CAN_RX_FIFO0) /* Rx元素分配给Rx FIFO 0 */
     {
-      /* Check that the Rx FIFO 0 is not empty */
+      /* 检查Rx FIFO 0是否不为空 */
       if ((hcan->Instance->RF0R & CAN_RF0R_FMP0) == 0U)
       {
-        /* Update error code */
+        /* 更新错误代码 */
         hcan->ErrorCode |= HAL_CAN_ERROR_PARAM;
 
-        return HAL_ERROR;
+        return HAL_ERROR;  // 由于参数错误而返回失败状态
       }
     }
-    else /* Rx element is assigned to Rx FIFO 1 */
+    else /* Rx元素分配给Rx FIFO 1 */
     {
-      /* Check that the Rx FIFO 1 is not empty */
+      /* 检查Rx FIFO 1是否不为空 */
       if ((hcan->Instance->RF1R & CAN_RF1R_FMP1) == 0U)
       {
-        /* Update error code */
+        /* 更新错误代码 */
         hcan->ErrorCode |= HAL_CAN_ERROR_PARAM;
 
-        return HAL_ERROR;
+        return HAL_ERROR;  // 由于参数错误而返回失败状态
       }
     }
 
-    /* Get the header */
-    pHeader->IDE = CAN_RI0R_IDE & hcan->Instance->sFIFOMailBox[RxFifo].RIR;
-    if (pHeader->IDE == CAN_ID_STD)
+    /* 获取头部信息 */
+    pHeader->IDE = CAN_RI0R_IDE & hcan->Instance->sFIFOMailBox[RxFifo].RIR;  // 获取标识符扩展
+    if (pHeader->IDE == CAN_ID_STD)  // 如果是标准标识符
     {
-      pHeader->StdId = (CAN_RI0R_STID & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_TI0R_STID_Pos;
+      pHeader->StdId = (CAN_RI0R_STID & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_TI0R_STID_Pos;  // 获取标准标识符
     }
-    else
+    else  // 如果是扩展标识符
     {
-      pHeader->ExtId = ((CAN_RI0R_EXID | CAN_RI0R_STID) & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_RI0R_EXID_Pos;
+      pHeader->ExtId = ((CAN_RI0R_EXID | CAN_RI0R_STID) & hcan->Instance->sFIFOMailBox[RxFifo].RIR) >> CAN_RI0R_EXID_Pos;  // 获取扩展标识符
     }
-    pHeader->RTR = (CAN_RI0R_RTR & hcan->Instance->sFIFOMailBox[RxFifo].RIR);
-    pHeader->DLC = (CAN_RDT0R_DLC & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_DLC_Pos;
-    pHeader->FilterMatchIndex = (CAN_RDT0R_FMI & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_FMI_Pos;
-    pHeader->Timestamp = (CAN_RDT0R_TIME & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_TIME_Pos;
+    pHeader->RTR = (CAN_RI0R_RTR & hcan->Instance->sFIFOMailBox[RxFifo].RIR);  // 获取远程传输请求标志
+    pHeader->DLC = (CAN_RDT0R_DLC & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_DLC_Pos;  // 获取数据长度代码
+    pHeader->FilterMatchIndex = (CAN_RDT0R_FMI & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_FMI_Pos;  // 获取过滤器匹配指数
+    pHeader->Timestamp = (CAN_RDT0R_TIME & hcan->Instance->sFIFOMailBox[RxFifo].RDTR) >> CAN_RDT0R_TIME_Pos;  // 获取时间戳
 
-    /* Get the data */
-    aData[0] = (uint8_t)((CAN_RDL0R_DATA0 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA0_Pos);
-    aData[1] = (uint8_t)((CAN_RDL0R_DATA1 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA1_Pos);
-    aData[2] = (uint8_t)((CAN_RDL0R_DATA2 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA2_Pos);
-    aData[3] = (uint8_t)((CAN_RDL0R_DATA3 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA3_Pos);
-    aData[4] = (uint8_t)((CAN_RDH0R_DATA4 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA4_Pos);
-    aData[5] = (uint8_t)((CAN_RDH0R_DATA5 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA5_Pos);
-    aData[6] = (uint8_t)((CAN_RDH0R_DATA6 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA6_Pos);
-    aData[7] = (uint8_t)((CAN_RDH0R_DATA7 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA7_Pos);
+    /* 获取数据 */
+    aData[0] = (uint8_t)((CAN_RDL0R_DATA0 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA0_Pos);  // 读取数据0
+    aData[1] = (uint8_t)((CAN_RDL0R_DATA1 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA1_Pos);  // 读取数据1
+    aData[2] = (uint8_t)((CAN_RDL0R_DATA2 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA2_Pos);  // 读取数据2
+    aData[3] = (uint8_t)((CAN_RDL0R_DATA3 & hcan->Instance->sFIFOMailBox[RxFifo].RDLR) >> CAN_RDL0R_DATA3_Pos);  // 读取数据3
+    aData[4] = (uint8_t)((CAN_RDH0R_DATA4 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA4_Pos);  // 读取数据4
+    aData[5] = (uint8_t)((CAN_RDH0R_DATA5 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA5_Pos);  // 读取数据5
+    aData[6] = (uint8_t)((CAN_RDH0R_DATA6 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA6_Pos);  // 读取数据6
+    aData[7] = (uint8_t)((CAN_RDH0R_DATA7 & hcan->Instance->sFIFOMailBox[RxFifo].RDHR) >> CAN_RDH0R_DATA7_Pos);  // 读取数据7
 
-    /* Release the FIFO */
-    if (RxFifo == CAN_RX_FIFO0) /* Rx element is assigned to Rx FIFO 0 */
+    /* 释放FIFO */
+    if (RxFifo == CAN_RX_FIFO0) /* Rx元素分配给Rx FIFO 0 */
     {
-      /* Release RX FIFO 0 */
-      SET_BIT(hcan->Instance->RF0R, CAN_RF0R_RFOM0);
+      /* 释放RX FIFO 0 */
+      SET_BIT(hcan->Instance->RF0R, CAN_RF0R_RFOM0);  // 设置位以释放消息
     }
-    else /* Rx element is assigned to Rx FIFO 1 */
+    else /* Rx元素分配给Rx FIFO 1 */
     {
-      /* Release RX FIFO 1 */
-      SET_BIT(hcan->Instance->RF1R, CAN_RF1R_RFOM1);
+      /* 释放RX FIFO 1 */
+      SET_BIT(hcan->Instance->RF1R, CAN_RF1R_RFOM1);  // 设置位以释放消息
     }
 
-    /* Return function status */
-    return HAL_OK;
+    /* 返回函数状态 */
+    return HAL_OK;  // 成功完成操作
   }
-  else
+  else  // 如果CAN不是就绪状态或监听状态
   {
-    /* Update error code */
-    hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
+    /* 更新错误代码 */
+    hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;  // 设置未初始化错误标志
 
-    return HAL_ERROR;
+    return HAL_ERROR;  // 由于未初始化而返回失败状态
   }
 }
 
 /**
-  * @brief  Return Rx FIFO fill level.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  RxFifo Rx FIFO.
-  *         This parameter can be a value of @arg CAN_receive_FIFO_number.
-  * @retval Number of messages available in Rx FIFO.
+  * @brief  返回接收FIFO的填充级别。
+  * @param  hcan 指向一个包含指定CAN配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  RxFifo 接收FIFO。
+  *         此参数可以是 @arg CAN_receive_FIFO_number 的值。
+  * @retval 接收FIFO中可用消息的数量。
   */
 uint32_t HAL_CAN_GetRxFifoFillLevel(CAN_HandleTypeDef *hcan, uint32_t RxFifo)
 {
-  uint32_t filllevel = 0U;
+  uint32_t filllevel = 0U;  // FIFO填充级别
+
+  // 获取当前CAN控制器的状态
   HAL_CAN_StateTypeDef state = hcan->State;
 
-  /* Check function parameters */
+  // 检查函数参数
   assert_param(IS_CAN_RX_FIFO(RxFifo));
 
+  // 如果CAN控制器处于就绪状态或监听状态，则尝试读取FIFO填充级别
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
+    // 根据所选择的FIFO，获取相应的填充级别
     if (RxFifo == CAN_RX_FIFO0)
     {
+      // 从寄存器获取FIFO0的填充级别
       filllevel = hcan->Instance->RF0R & CAN_RF0R_FMP0;
     }
     else /* RxFifo == CAN_RX_FIFO1 */
     {
+      // 从寄存器获取FIFO1的填充级别
       filllevel = hcan->Instance->RF1R & CAN_RF1R_FMP1;
     }
   }
 
-  /* Return Rx FIFO fill level */
+  // 返回接收FIFO的填充级别
   return filllevel;
 }
 
@@ -1617,76 +1590,75 @@ uint32_t HAL_CAN_GetRxFifoFillLevel(CAN_HandleTypeDef *hcan, uint32_t RxFifo)
   */
 
 /**
-  * @brief  Enable interrupts.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  ActiveITs indicates which interrupts will be enabled.
-  *         This parameter can be any combination of @arg CAN_Interrupts.
-  * @retval HAL status
+  * @brief  启用中断。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  ActiveITs 指示将启用哪些中断。
+  *         该参数可以是 @arg CAN_Interrupts 的任意组合。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_ActivateNotification(CAN_HandleTypeDef *hcan, uint32_t ActiveITs)
 {
   HAL_CAN_StateTypeDef state = hcan->State;
 
-  /* Check function parameters */
+  /* 检查函数参数 */
   assert_param(IS_CAN_IT(ActiveITs));
 
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Enable the selected interrupts */
+    /* 启用所选中断 */
     __HAL_CAN_ENABLE_IT(hcan, ActiveITs);
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
 
+    /* 返回错误状态 */
     return HAL_ERROR;
   }
 }
 
 /**
-  * @brief  Disable interrupts.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @param  InactiveITs indicates which interrupts will be disabled.
-  *         This parameter can be any combination of @arg CAN_Interrupts.
-  * @retval HAL status
+  * @brief  禁用中断。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @param  InactiveITs 指示将禁用哪些中断。
+  *         该参数可以是 @arg CAN_Interrupts 的任意组合。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_DeactivateNotification(CAN_HandleTypeDef *hcan, uint32_t InactiveITs)
 {
   HAL_CAN_StateTypeDef state = hcan->State;
 
-  /* Check function parameters */
+  /* 检查函数参数 */
   assert_param(IS_CAN_IT(InactiveITs));
 
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Disable the selected interrupts */
+    /* 禁用所选中断 */
     __HAL_CAN_DISABLE_IT(hcan, InactiveITs);
 
-    /* Return function status */
+    /* 返回函数状态 */
     return HAL_OK;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
 
+    /* 返回错误状态 */
     return HAL_ERROR;
   }
 }
 
 /**
-  * @brief  Handles CAN interrupt request
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  处理CAN中断请求
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
 {
@@ -2094,138 +2066,122 @@ void HAL_CAN_IRQHandler(CAN_HandleTypeDef *hcan)
   */
 
 /**
-  * @brief  Transmission Mailbox 0 complete callback.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  发送邮箱0传输完成的回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_TxMailbox0CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_TxMailbox0CompleteCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_TxMailbox0CompleteCallback
    */
 }
 
 /**
-  * @brief  Transmission Mailbox 1 complete callback.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  发送邮箱1传输完成的回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_TxMailbox1CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_TxMailbox1CompleteCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_TxMailbox1CompleteCallback
    */
 }
 
 /**
-  * @brief  Transmission Mailbox 2 complete callback.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  发送邮箱2传输完成的回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_TxMailbox2CompleteCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_TxMailbox2CompleteCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_TxMailbox2CompleteCallback
    */
 }
 
 /**
-  * @brief  Transmission Mailbox 0 Cancellation callback.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  传输邮箱0取消回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_TxMailbox0AbortCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_TxMailbox0AbortCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_TxMailbox0AbortCallback
    */
 }
 
 /**
-  * @brief  Transmission Mailbox 1 Cancellation callback.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  传输邮箱1取消回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_TxMailbox1AbortCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_TxMailbox1AbortCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_TxMailbox1AbortCallback
    */
 }
 
 /**
-  * @brief  Transmission Mailbox 2 Cancellation callback.
-  * @param  hcan pointer to an CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  传输邮箱2取消回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_TxMailbox2AbortCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_TxMailbox2AbortCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_TxMailbox2AbortCallback
    */
 }
 
 /**
-  * @brief  Rx FIFO 0 message pending callback.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  接收FIFO 0消息待处理回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_RxFifo0MsgPendingCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_RxFifo0MsgPendingCallback could be implemented in the
-            user file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_RxFifo0MsgPendingCallback
    */
 }
 
 /**
-  * @brief  Rx FIFO 0 full callback.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval None
+  * @brief  接收FIFO 0满回调。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval 无
   */
 __weak void HAL_CAN_RxFifo0FullCallback(CAN_HandleTypeDef *hcan)
 {
-  /* Prevent unused argument(s) compilation warning */
+  /* 防止编译警告出现未使用的参数 */
   UNUSED(hcan);
 
-  /* NOTE : This function Should not be modified, when the callback is needed,
-            the HAL_CAN_RxFifo0FullCallback could be implemented in the user
-            file
+  /* 注意：当需要回调时，不应修改此函数，
+            用户可以在用户文件中实现HAL_CAN_RxFifo0FullCallback
    */
 }
 
@@ -2316,7 +2272,7 @@ __weak void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
   * @}
   */
 
-/** @defgroup CAN_Exported_Functions_Group6 Peripheral State and Error functions
+/** @defgroup CAN_Exported_Functions_Group6 外设状态和错误函数
  *  @brief   CAN Peripheral State functions
  *
 @verbatim
@@ -2334,10 +2290,9 @@ __weak void HAL_CAN_ErrorCallback(CAN_HandleTypeDef *hcan)
   */
 
 /**
-  * @brief  Return the CAN state.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL state
+  * @brief  返回CAN状态。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval HAL状态
   */
 HAL_CAN_StateTypeDef HAL_CAN_GetState(CAN_HandleTypeDef *hcan)
 {
@@ -2346,45 +2301,43 @@ HAL_CAN_StateTypeDef HAL_CAN_GetState(CAN_HandleTypeDef *hcan)
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Check sleep mode acknowledge flag */
+    /* 检查睡眠模式确认标志 */
     if ((hcan->Instance->MSR & CAN_MSR_SLAK) != 0U)
     {
-      /* Sleep mode is active */
+      /* 睡眠模式处于激活状态 */
       state = HAL_CAN_STATE_SLEEP_ACTIVE;
     }
-    /* Check sleep mode request flag */
+    /* 检查睡眠模式请求标志 */
     else if ((hcan->Instance->MCR & CAN_MCR_SLEEP) != 0U)
     {
-      /* Sleep mode request is pending */
+      /* 睡眠模式请求待处理 */
       state = HAL_CAN_STATE_SLEEP_PENDING;
     }
     else
     {
-      /* Neither sleep mode request nor sleep mode acknowledge */
+      /* 既没有睡眠模式请求也没有睡眠模式确认 */
     }
   }
 
-  /* Return CAN state */
+  /* 返回CAN状态 */
   return state;
 }
 
 /**
-  * @brief  Return the CAN error code.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval CAN Error Code
+  * @brief  返回CAN错误代码。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval CAN错误代码
   */
 uint32_t HAL_CAN_GetError(CAN_HandleTypeDef *hcan)
 {
-  /* Return CAN error code */
+  /* 返回CAN错误代码 */
   return hcan->ErrorCode;
 }
 
 /**
-  * @brief  Reset the CAN error code.
-  * @param  hcan pointer to a CAN_HandleTypeDef structure that contains
-  *         the configuration information for the specified CAN.
-  * @retval HAL status
+  * @brief  重置CAN错误代码。
+  * @param  hcan 指向包含指定CAN的配置信息的CAN_HandleTypeDef结构的指针。
+  * @retval HAL状态
   */
 HAL_StatusTypeDef HAL_CAN_ResetError(CAN_HandleTypeDef *hcan)
 {
@@ -2394,18 +2347,18 @@ HAL_StatusTypeDef HAL_CAN_ResetError(CAN_HandleTypeDef *hcan)
   if ((state == HAL_CAN_STATE_READY) ||
       (state == HAL_CAN_STATE_LISTENING))
   {
-    /* Reset CAN error code */
+    /* 重置CAN错误代码 */
     hcan->ErrorCode = 0U;
   }
   else
   {
-    /* Update error code */
+    /* 更新错误代码 */
     hcan->ErrorCode |= HAL_CAN_ERROR_NOT_INITIALIZED;
 
     status = HAL_ERROR;
   }
 
-  /* Return the status */
+  /* 返回状态 */
   return status;
 }
 

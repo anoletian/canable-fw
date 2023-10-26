@@ -121,23 +121,23 @@
   */
 
 /**
-  * @brief  Sets the priority of an interrupt.
-  * @param  IRQn External interrupt number .
-  *         This parameter can be an enumerator of IRQn_Type enumeration
-  *         (For the complete STM32 Devices IRQ Channels list, please refer to stm32f0xx.h file)
-  * @param  PreemptPriority The preemption priority for the IRQn channel.
-  *         This parameter can be a value between 0 and 3.
-  *         A lower priority value indicates a higher priority
-  * @param  SubPriority the subpriority level for the IRQ channel.
-  *         with stm32f0xx devices, this parameter is a dummy value and it is ignored, because 
-  *         no subpriority supported in Cortex M0 based products.   
-  * @retval None
+  * @brief  设置中断的优先级。
+  * @param  IRQn 外部中断号。
+  *         此参数可以是IRQn_Type枚举的枚举器
+  *         （有关完整的STM32设备IRQ通道列表，请参阅stm32f0xx.h文件）
+  * @param  PreemptPriority IRQn通道的抢占优先级。
+  *         此参数可以是0到3之间的值。
+  *         优先级值越低，优先级越高
+  * @param  SubPriority IRQ通道的子优先级。
+  *         对于stm32f0xx设备，此参数是一个虚拟值，将被忽略，因为
+  *         Cortex M0基础产品不支持子优先级。
+  * @retval 无
   */
 void HAL_NVIC_SetPriority(IRQn_Type IRQn, uint32_t PreemptPriority, uint32_t SubPriority)
 { 
-  /* Check the parameters */
+  /* 检查参数 */
   assert_param(IS_NVIC_PREEMPTION_PRIORITY(PreemptPriority));
-  NVIC_SetPriority(IRQn,PreemptPriority);
+  NVIC_SetPriority(IRQn, PreemptPriority); // 设置中断优先级
 }
 
 /**
