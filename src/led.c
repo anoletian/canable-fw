@@ -50,7 +50,7 @@ void led_green_off(void)
 }
 
 
-// Blink blue LED (blocking)
+//蓝色LED闪烁（阻塞）
 void led_blue_blink(uint8_t numblinks)
 {
 	uint8_t i;

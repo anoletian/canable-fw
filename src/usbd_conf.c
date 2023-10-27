@@ -611,20 +611,22 @@ USBD_StatusTypeDef USBD_LL_SetUSBAddress(USBD_HandleTypeDef *pdev, uint8_t dev_a
 }
 
 /**
-  * @brief  Transmits data over an endpoint.
-  * @param  pdev: Device handle
-  * @param  ep_addr: Endpoint number
-  * @param  pbuf: Pointer to data to be sent
-  * @param  size: Data size    
-  * @retval USBD status
+  * @brief  通过一个端点传输数据。
+  * @param  pdev: 设备句柄
+  * @param  ep_addr: 端点编号
+  * @param  pbuf: 指向要发送的数据的指针
+  * @param  size: 数据大小
+  * @retval USBD 状态
   */
 USBD_StatusTypeDef USBD_LL_Transmit(USBD_HandleTypeDef *pdev, uint8_t ep_addr, uint8_t *pbuf, uint16_t size)
 {
-  HAL_StatusTypeDef hal_status = HAL_OK;
-  USBD_StatusTypeDef usb_status = USBD_OK;
+  HAL_StatusTypeDef hal_status = HAL_OK;      // 定义HAL状态为OK
+  USBD_StatusTypeDef usb_status = USBD_OK;    // 定义USB状态为OK
 
+  // 调用HAL层的EP_Transmit函数进行数据传输
   hal_status = HAL_PCD_EP_Transmit(pdev->pData, ep_addr, pbuf, size);
      
+  // 根据HAL层的返回状态，设置USB层的状态
   switch (hal_status) {
     case HAL_OK :
       usb_status = USBD_OK;
@@ -642,7 +644,7 @@ USBD_StatusTypeDef USBD_LL_Transmit(USBD_HandleTypeDef *pdev, uint8_t ep_addr, u
       usb_status = USBD_FAIL;
     break;
   }
-  return usb_status;    
+  return usb_status;    // 返回USB层的状态
 }
 
 /**

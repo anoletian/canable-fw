@@ -858,25 +858,25 @@ uint8_t  USBD_CDC_SetRxBuffer(USBD_HandleTypeDef   *pdev,
 
 /**
   * @brief  USBD_CDC_TransmitPacket
-  *         Transmit packet on IN endpoint
-  * @param  pdev: device instance
-  * @retval status
+  *         在IN端点上发送数据包
+  * @param  pdev: 设备实例
+  * @retval 状态
   */
-uint8_t  USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
+uint8_t USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
 {
-  USBD_CDC_HandleTypeDef   *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef *) pdev->pClassData;
 
   if (pdev->pClassData != NULL)
   {
     if (hcdc->TxState == 0U)
     {
-      /* Tx Transfer in progress */
+      /* 正在进行Tx传输 */
       hcdc->TxState = 1U;
 
-      /* Update the packet total length */
+      /* 更新数据包的总长度 */
       pdev->ep_in[CDC_IN_EP & 0xFU].total_length = hcdc->TxLength;
 
-      /* Transmit next packet */
+      /* 发送下一个数据包 */
       USBD_LL_Transmit(pdev, CDC_IN_EP, hcdc->TxBuffer,
                        (uint16_t)hcdc->TxLength);
 
@@ -884,12 +884,12 @@ uint8_t  USBD_CDC_TransmitPacket(USBD_HandleTypeDef *pdev)
     }
     else
     {
-      return USBD_BUSY;
+      return USBD_BUSY;  // 设备忙
     }
   }
   else
   {
-    return USBD_FAIL;
+    return USBD_FAIL;  // 设备失败
   }
 }
 

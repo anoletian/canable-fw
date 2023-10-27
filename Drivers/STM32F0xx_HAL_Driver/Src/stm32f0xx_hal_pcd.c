@@ -1462,27 +1462,30 @@ uint32_t HAL_PCD_EP_GetRxCount(PCD_HandleTypeDef *hpcd, uint8_t ep_addr)
 {
   return hpcd->OUT_ep[ep_addr & EP_ADDR_MSK].xfer_count;
 }
+
 /**
-  * @brief  Send an amount of data
-  * @param  hpcd PCD handle
-  * @param  ep_addr endpoint address
-  * @param  pBuf pointer to the transmission buffer
-  * @param  len amount of data to be sent
-  * @retval HAL status
+  * @brief  发送一定量的数据
+  * @param  hpcd PCD句柄
+  * @param  ep_addr 端点地址
+  * @param  pBuf 指向传输缓冲区的指针
+  * @param  len 要发送的数据量
+  * @retval HAL 状态
   */
 HAL_StatusTypeDef HAL_PCD_EP_Transmit(PCD_HandleTypeDef *hpcd, uint8_t ep_addr, uint8_t *pBuf, uint32_t len)
 {
   PCD_EPTypeDef *ep;
 
+  // 获取对应的IN端点结构的地址
   ep = &hpcd->IN_ep[ep_addr & EP_ADDR_MSK];
 
-  /*setup and start the Xfer */
-  ep->xfer_buff = pBuf;
-  ep->xfer_len = len;
-  ep->xfer_count = 0U;
-  ep->is_in = 1U;
-  ep->num = ep_addr & EP_ADDR_MSK;
+  // 设置并开始传输
+  ep->xfer_buff = pBuf;       // 设置传输缓冲区的指针
+  ep->xfer_len = len;         // 设置传输的数据长度
+  ep->xfer_count = 0U;        // 初始化传输计数为0
+  ep->is_in = 1U;             // 设置为IN端点
+  ep->num = ep_addr & EP_ADDR_MSK; // 设置端点号
 
+  // 如果是端点0，则使用USB_EP0StartXfer函数开始传输，否则使用USB_EPStartXfer函数
   if ((ep_addr & EP_ADDR_MSK) == 0U)
   {
     (void)USB_EP0StartXfer(hpcd->Instance, ep);
@@ -1492,7 +1495,7 @@ HAL_StatusTypeDef HAL_PCD_EP_Transmit(PCD_HandleTypeDef *hpcd, uint8_t ep_addr, 
     (void)USB_EPStartXfer(hpcd->Instance, ep);
   }
 
-  return HAL_OK;
+  return HAL_OK; // 返回HAL_OK状态
 }
 
 /**

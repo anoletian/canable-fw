@@ -402,20 +402,20 @@ HAL_StatusTypeDef USB_DeactivateEndpoint(USB_TypeDef *USBx, USB_EPTypeDef *ep)
 }
 
 /**
-  * @brief  USB_EPStartXfer : setup and starts a transfer over an EP
-  * @param  USBx : Selected device
-  * @param  ep: pointer to endpoint structure
-  * @retval HAL status
+  * @brief  USB_EPStartXfer : 设置并开始一个端点的传输
+  * @param  USBx : 选定的设备
+  * @param  ep: 指向端点结构的指针
+  * @retval HAL 状态
   */
 HAL_StatusTypeDef USB_EPStartXfer(USB_TypeDef *USBx, USB_EPTypeDef *ep)
 {
   uint16_t pmabuffer;
   uint32_t len;
 
-  /* IN endpoint */
+  /* IN 端点 */
   if (ep->is_in == 1U)
   {
-    /*Multi packet transfer*/
+    /*多包传输*/
     if (ep->xfer_len > ep->maxpacket)
     {
       len = ep->maxpacket;
@@ -427,7 +427,7 @@ HAL_StatusTypeDef USB_EPStartXfer(USB_TypeDef *USBx, USB_EPTypeDef *ep)
       ep->xfer_len = 0U;
     }
 
-    /* configure and validate Tx endpoint */
+    /* 配置和验证 Tx 端点 */
     if (ep->doublebuffer == 0U)
     {
       USB_WritePMA(USBx, ep->xfer_buff, ep->pmaadress, (uint16_t)len);
@@ -435,16 +435,16 @@ HAL_StatusTypeDef USB_EPStartXfer(USB_TypeDef *USBx, USB_EPTypeDef *ep)
     }
     else
     {
-      /* Write the data to the USB endpoint */
+      /* 将数据写入USB端点 */
       if ((PCD_GET_ENDPOINT(USBx, ep->num) & USB_EP_DTOG_TX) != 0U)
       {
-        /* Set the Double buffer counter for pmabuffer1 */
+        /* 为 pmabuffer1 设置双缓冲计数器 */
         PCD_SET_EP_DBUF1_CNT(USBx, ep->num, ep->is_in, len);
         pmabuffer = ep->pmaaddr1;
       }
       else
       {
-        /* Set the Double buffer counter for pmabuffer0 */
+        /* 为 pmabuffer0 设置双缓冲计数器 */
         PCD_SET_EP_DBUF0_CNT(USBx, ep->num, ep->is_in, len);
         pmabuffer = ep->pmaaddr0;
       }
@@ -454,9 +454,9 @@ HAL_StatusTypeDef USB_EPStartXfer(USB_TypeDef *USBx, USB_EPTypeDef *ep)
 
     PCD_SET_EP_TX_STATUS(USBx, ep->num, USB_EP_TX_VALID);
   }
-  else /* OUT endpoint */
+  else /* OUT 端点 */
   {
-    /* Multi packet transfer*/
+    /* 多包传输 */
     if (ep->xfer_len > ep->maxpacket)
     {
       len = ep->maxpacket;
@@ -468,15 +468,15 @@ HAL_StatusTypeDef USB_EPStartXfer(USB_TypeDef *USBx, USB_EPTypeDef *ep)
       ep->xfer_len = 0U;
     }
 
-    /* configure and validate Rx endpoint */
+    /* 配置和验证 Rx 端点 */
     if (ep->doublebuffer == 0U)
     {
-      /*Set RX buffer count*/
+      /*设置 RX 缓冲计数*/
       PCD_SET_EP_RX_CNT(USBx, ep->num, len);
     }
     else
     {
-      /*Set the Double buffer counter*/
+      /*设置双缓冲计数器*/
       PCD_SET_EP_DBUF_CNT(USBx, ep->num, ep->is_in, len);
     }
 
@@ -787,36 +787,37 @@ HAL_StatusTypeDef USB_DeActivateRemoteWakeup(USB_TypeDef *USBx)
 }
 
 /**
-  * @brief Copy a buffer from user memory area to packet memory area (PMA)
-  * @param   USBx USB peripheral instance register address.
-  * @param   pbUsrBuf pointer to user memory area.
-  * @param   wPMABufAddr address into PMA.
-  * @param   wNBytes: no. of bytes to be copied.
-  * @retval None
+  * @brief 从用户内存区复制一个缓冲区到数据包内存区域 (PMA)
+  * @param   USBx USB外设实例注册地址。
+  * @param   pbUsrBuf 指向用户内存区的指针。
+  * @param   wPMABufAddr 在PMA的地址。
+  * @param   wNBytes: 要复制的字节数。
+  * @retval 无
   */
 void USB_WritePMA(USB_TypeDef *USBx, uint8_t *pbUsrBuf, uint16_t wPMABufAddr, uint16_t wNBytes)
 {
-  uint32_t n = ((uint32_t)wNBytes + 1U) >> 1;
+  uint32_t n = ((uint32_t)wNBytes + 1U) >> 1; // 计算需要复制的半字数
   uint32_t BaseAddr = (uint32_t)USBx;
   uint32_t i, temp1, temp2;
   __IO uint16_t *pdwVal;
   uint8_t *pBuf = pbUsrBuf;
 
+  // 获取PMA的目标地址
   pdwVal = (__IO uint16_t *)(BaseAddr + 0x400U + ((uint32_t)wPMABufAddr * PMA_ACCESS));
 
   for (i = n; i != 0U; i--)
   {
-    temp1 = *pBuf;
+    temp1 = *pBuf;  // 获取一个字节
     pBuf++;
-    temp2 = temp1 | ((uint16_t)((uint16_t) *pBuf << 8));
-    *pdwVal = (uint16_t)temp2;
+    temp2 = temp1 | ((uint16_t)((uint16_t) *pBuf << 8)); // 与下一个字节组成一个半字
+    *pdwVal = (uint16_t)temp2;  // 将半字写入PMA
     pdwVal++;
 
 #if PMA_ACCESS > 1U
-    pdwVal++;
+    pdwVal++;  // 如果PMA_ACCESS大于1，则跳过一个地址
 #endif
 
-    pBuf++;
+    pBuf++; // 移动到下一个字节
   }
 }
 
